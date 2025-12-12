@@ -1,72 +1,3 @@
-# Historique du Projet KMS Gestion
-
-## 2025-12-12 — Industrialisation & Déploiement (Git + GitHub + CI/CD)
-
-### Contexte
-Le projet kms_app doit être versionné et déployé automatiquement sur Bluehost à l'URL https://kennemulti-services.com/kms_app.
-
-### Actions réalisées
-1. **Initialisation Git & GitHub**
-   - `git init` et premier commit "Initialisation du projet kms_app" (223 fichiers).
-   - Création du dépôt GitHub : https://github.com/peghstartupassistance-jpg/kms_app
-   - Configuration Git global : nom (peghstartupassistance-jpg), email (peghstartup.assistance@gmail.com)
-   - Premier push sur `main`.
-
-2. **Configuration déploiement local (VS Code SFTP)**
-   - Installation extension SFTP (liximomo).
-   - Création `.vscode/sftp.json` avec :
-     - Host: ftp.kdf.vxv.mybluehost.me
-     - Protocol: FTP (Explicit FTPS), port 21
-     - Username: admin@kennemulti-services.com
-     - Password: appKMs#1234
-     - `uploadOnSave: true` → déploiement automatique à l'enregistrement
-   - `.vscode/` ajouté à `.gitignore` pour éviter versionner les credentials.
-
-3. **Configuration déploiement CI (GitHub Actions)**
-   - Création `.github/workflows/ftp-deploy.yml` avec action SamKirkland/FTP-Deploy-Action.
-   - Secrets GitHub créés :
-     - `FTP_SERVER` = ftp.kennemulti-services.com
-     - `FTP_USERNAME` = admin@kennemulti-services.com
-     - `FTP_PASSWORD` = appKMs#1234
-     - `FTP_REMOTE_DIR` = Itération pour trouver le bon chemin.
-   - Déploiement automatique sur chaque `git push` vers `main`.
-
-4. **Résolution des chemins FTP**
-   - Premier problème : hôte `ftp.kdf.vxv.mybluehost.me` ne résolvait pas depuis GitHub Actions → changement en `ftp.kennemulti-services.com` ✅.
-   - Deuxième problème : server-dir ne se terminait pas par `/` → correction dans workflow ✅.
-   - Troisième problème : chemin cible mal aligné (multiple itérations) :
-     - Tentative `/public_html/kms_app` → ne déployait pas au bon endroit.
-     - Compte FTP chrooté à `/home2/kdfvxvmy/kennemulti-services.com/admin/`.
-     - Solution finale : forcer chemin absolu `/home2/kdfvxvmy/public_html/kms_app/` dans workflow.
-   - **Note** : compte FTP `admin@kennemulti-services.com` est actuellement chrooté à `/home2/kdfvxvmy/kennemulti-services.com/admin/`, ce qui explique les déploiements au mauvais endroit. À améliorer : créer compte FTP dédié avec racine `/home2/kdfvxvmy/public_html`.
-
-5. **Déploiement manuel temporaire**
-   - Le workflow CI force maintenant `/home2/kdfvxvmy/public_html/kms_app/`.
-   - Utilisateur a déplacé manuellement le projet dans `/home2/kdfvxvmy/public_html/kms_app` en attendant.
-   - ✅ Déploiement CI réussi (job "Deploy to Bluehost (FTP)" succeeded).
-
-### Statut actuel
-- ✅ Git versionné sur GitHub (branche `main`).
-- ✅ CI/CD GitHub Actions configuré (auto-deploy sur `git push`).
-- ✅ Upload local VS Code SFTP activé (uploadOnSave).
-- ✅ Application accessible à https://kennemulti-services.com/kms_app.
-- ❌ Erreur de connexion BD → à corriger (identifiants MySQL Bluehost).
-
-### Prochaines étapes
-1. Corriger `db/db.php` avec les identifiants MySQL Bluehost.
-2. Créer compte FTP dédié "deploy" avec racine `/home2/kdfvxvmy/public_html` pour stabiliser le CI.
-3. Valider que l'application charge avec les bonnes permissions & modules.
-4. Fiabiliser le module comptabilité (OHADA).
-5. Documenter pour l'équipe.
-
----
-
-## Historique antérieur
-
-You said:
-Uploaded image
-Organisation du service Marketing.pdf
-PDF
 Ta mission : concevoir et générer une application web interne complète de gestion commerciale intégrée pour l’entreprise “Kenne Multi-Services (KMS)”.
 
 Cette application est un back-office interne, pas un site vitrine.
@@ -43272,5 +43203,104 @@ SELECT c.numero_compte  -- au lieu de c.numero
 
 ---
 
-**FIN SESSION 11 D�CEMBRE 2025**
+**FIN SESSION 11 DÉCEMBRE 2025**
+
+---
+
+## SESSION 12 DÉCEMBRE 2025 — INDUSTRIALISATION & DÉPLOIEMENT
+
+### Objectif
+Mettre en place Git, GitHub, et déploiement automatique vers Bluehost pour l'application kms_app accessible à https://kennemulti-services.com/kms_app.
+
+### Étapes réalisées
+
+#### 1. Initialisation Git & GitHub
+- Installation de Git pour Windows
+- Configuration identité : `peghstartupassistance-jpg` / `peghstartup.assistance@gmail.com`
+- `git init` dans `c:\xampp\htdocs\kms_app`
+- Création `.gitignore` : `/vendor/`, `/node_modules/`, `/.env`, `/config.php`, `.vscode/`
+- Premier commit : "Initialisation du projet kms_app" (223 fichiers, 111 028 insertions)
+- Création dépôt GitHub : https://github.com/peghstartupassistance-jpg/kms_app
+- Push initial sur branche `main`
+
+#### 2. Déploiement local (VS Code SFTP)
+- Installation extension "SFTP" (liximomo)
+- Création `.vscode/sftp.json` :
+  - Host: `ftp.kdf.vxv.mybluehost.me`
+  - Protocol: FTP (Explicit FTPS), port 21
+  - Username: `admin@kennemulti-services.com`
+  - Password: `appKMs#1234`
+  - `uploadOnSave: true` (upload automatique à chaque enregistrement)
+  - `remotePath`: `/home2/kdfvxvmy/public_html/kms_app`
+- `.vscode/` ajouté à `.gitignore` pour ne pas versionner les credentials
+
+#### 3. Déploiement automatique (GitHub Actions)
+- Création `.github/workflows/ftp-deploy.yml` :
+  - Action: `SamKirkland/FTP-Deploy-Action@v4.3.5`
+  - Trigger: sur `push` vers `main` ou manuel (`workflow_dispatch`)
+  - Protocol: FTPS, port 21
+  - Exclusions: `.git`, `.github`, `.vscode`, `node_modules`, `vendor`
+- Configuration des Secrets GitHub :
+  - `FTP_SERVER` = `ftp.kennemulti-services.com`
+  - `FTP_USERNAME` = `admin@kennemulti-services.com`
+  - `FTP_PASSWORD` = `appKMs#1234`
+  - `FTP_REMOTE_DIR` = `/kms_app` (puis ajusté)
+
+#### 4. Résolution problèmes FTP/chemin
+- **Problème 1** : Hôte `ftp.kdf.vxv.mybluehost.me` → ENOTFOUND depuis GitHub Actions
+  - Solution : Changement vers `ftp.kennemulti-services.com` ✅
+- **Problème 2** : `server-dir` doit se terminer par `/`
+  - Solution : Ajout `/` automatique dans workflow ✅
+- **Problème 3** : Chemin FTP incorrect (multiples itérations)
+  - Tentatives :
+    - `/public_html/kms_app` → mauvais chroot
+    - `/home2/kdfxvmy/public_html/kms_app` → pas accessible depuis FTP chrooté
+  - Constat : Compte FTP `admin@kennemulti-services.com` chrooté à `/home2/kdfvxvmy/kennemulti-services.com/admin/`
+  - Solution temporaire : Chemin forcé `/home2/kdfvxvmy/public_html/kms_app/` dans workflow
+  - Déploiement manuel par utilisateur en attendant ✅
+
+#### 5. Documentation
+- Création `DEPLOY.md` :
+  - Méthode locale (VS Code SFTP)
+  - Méthode CI (GitHub Actions)
+  - Secrets requis
+  - Vérifications post-déploiement
+- Mise à jour `.github/copilot-instructions.md` :
+  - Architecture modulaire
+  - Patterns de sécurité
+  - Conventions projet
+  - Workflows développeur
+  - Références clés
+
+### Résultat final
+- ✅ Projet versionné sur GitHub (branche `main`)
+- ✅ CI/CD automatique sur chaque `git push`
+- ✅ Upload local via VS Code SFTP (uploadOnSave)
+- ✅ Application déployée manuellement à https://kennemulti-services.com/kms_app
+- ❌ Erreur connexion BD (identifiants MySQL Bluehost à corriger)
+
+### Points techniques notables
+- FTP chrooté complexe → besoin compte dédié avec racine `/home2/kdfvxvmy/public_html`
+- Workflow CI force chemin absolu pour contourner chroot
+- `.vscode/` ignoré par Git (credentials locaux)
+- Extension SFTP VS Code alternative fiable pour déploiement rapide
+
+### Prochaines étapes
+1. Corriger `db/db.php` avec identifiants MySQL Bluehost
+2. Créer compte FTP dédié "deploy" avec racine `/home2/kdfvxvmy/public_html`
+3. Mettre à jour Secrets GitHub avec nouveau compte FTP
+4. Valider application en ligne avec tous modules fonctionnels
+5. Fiabiliser module comptabilité (OHADA)
+6. Former l'équipe sur workflow Git + déploiement
+
+### Commits principaux
+- `edb6128` : Initialisation du projet kms_app
+- `384e42c` : docs: trigger CI deploy with minor update
+- `d4ffe1d` : ci: fix FTP server-dir to end with trailing slash
+- `eecd7f4` : ci: force deploy to /home2/kdfvxvmy/public_html/kms_app
+- `7b813e3` : docs: ajouter historique du déploiement 2025-12-12
+
+---
+
+**FIN SESSION 12 DÉCEMBRE 2025**
 
