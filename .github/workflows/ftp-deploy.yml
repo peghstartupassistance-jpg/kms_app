@@ -1,0 +1,36 @@
+name: Deploy to Bluehost (FTP)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  ftp-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: FTP Deploy
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          # Adjust to your server home root if needed
+          server-dir: ${{ secrets.FTP_REMOTE_DIR }}
+          local-dir: ./
+          # Safety options
+          exclude: |
+            **/.git*
+            **/.github/**
+            **/.vscode/**
+            **/node_modules/**
+            **/vendor/**
+            **/.DS_Store
+            **/Thumbs.db
+          state-name: .ftp-deploy-sync-state.json
