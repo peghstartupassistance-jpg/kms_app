@@ -22,7 +22,8 @@ jobs:
           protocol: ftps
           port: 21
           # Adjust to your server home root if needed
-          server-dir: ${{ secrets.FTP_REMOTE_DIR }}
+          # server-dir must end with '/'
+          server-dir: ${{ secrets.FTP_REMOTE_DIR }}/
           local-dir: ./
           # Safety options
           exclude: |
