@@ -72,3 +72,5 @@ Ensure this directory exists. If not, create `kms_app` under the domain root.
   - Stock: `stock/etat.php`, `stock/mouvements.php`
   - Ventes: `ventes/list.php`
 - If DB connection fails, verify `db/db.php` credentials on the server
+
+Note: CI deploy triggers automatically on pushes to `main`.
