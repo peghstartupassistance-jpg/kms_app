@@ -74,6 +74,7 @@ CI trigger note: this line bumps deploy.
 Note: CI deploy triggers automatically on pushes to `main`.
 
 Auto-trigger tip: any commit on `main` starts a new deploy.
-Target path (Bluehost): `/public_html/kms_app` (FTP chrooted to `/home2/kdfxvmy`)
+Target path (Bluehost): `/home2/kdfvxvmy/public_html/kms_app` (CI forced absolute path)
 Ensure folder `kms_app` exists under `public_html` before deploy.
- 
+CI deploy uses absolute path; local SFTP can stay on `/home2/kdfvxvmy/public_html/kms_app`.
+

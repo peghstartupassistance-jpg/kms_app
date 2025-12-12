@@ -23,7 +23,8 @@ jobs:
           port: 21
           # Adjust to your server home root if needed
           # server-dir must end with '/'
-          server-dir: ${{ secrets.FTP_REMOTE_DIR }}/
+          # Force absolute target to avoid chroot misplacement
+          server-dir: /home2/kdfvxvmy/public_html/kms_app/
           local-dir: ./
           # Safety options
           exclude: |
