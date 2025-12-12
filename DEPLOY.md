@@ -13,8 +13,8 @@ Two supported methods:
 
 We use the VS Code “SFTP” extension config stored locally in `.vscode/sftp.json` (ignored by Git).
 
-- Server: ftp.kdf.vxv.mybluehost.me (Explicit FTPS, port 21)
-- Remote path: /home2/kdfxvmy/kennemulti-services.com/admin/kms_app
+- Server: ftp.kennemulti-services.com (Explicit FTPS, port 21)
+- Remote path (FTP chrooted): `/kms_app` → déployé dans `/home2/kdfvxvmy/public_html/kms_app`
 
 Steps:
 1. Install extension “SFTP” (by liximomo) in VS Code
@@ -33,10 +33,10 @@ Notes:
 We include `.github/workflows/ftp-deploy.yml` which deploys on pushes to `main` or manually.
 
 Set these repository Secrets in GitHub (Settings → Secrets and variables → Actions):
-- `FTP_SERVER` = ftp.kdf.vxv.mybluehost.me
-- `FTP_USERNAME` = admin@kennemulti-services.com
-- `FTP_PASSWORD` = <Your FTP password>
-- `FTP_REMOTE_DIR` = /home2/kdfxvmy/kennemulti-services.com/admin/kms_app
+- `FTP_SERVER` = ftp.kennemulti-services.com
+- `FTP_USERNAME` = <FTP login pointant sur /home2/kdfvxvmy/public_html>
+- `FTP_PASSWORD` = <FTP password>
+- `FTP_REMOTE_DIR` = /kms_app  (la racine FTP est /home2/kdfvxvmy/public_html)
 
 Trigger:
 - Push to `main` or run the workflow via “Run workflow”.
@@ -48,7 +48,7 @@ Tip:
 
 ## Server-side structure
 
-- Domain root (per Bluehost): /home2/kdfxvmy/kennemulti-services.com/admin
+- Domain root (public web): /home2/kdfvxvmy/public_html
 - App path: /kms_app → maps to https://kennemulti-services.com/kms_app
 
 Ensure this directory exists. If not, create `kms_app` under the domain root.
