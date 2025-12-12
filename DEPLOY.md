@@ -74,3 +74,5 @@ Ensure this directory exists. If not, create `kms_app` under the domain root.
 - If DB connection fails, verify `db/db.php` credentials on the server
 
 Note: CI deploy triggers automatically on pushes to `main`.
+
+Auto-trigger tip: any commit on `main` starts a new deploy.
