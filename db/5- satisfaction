@@ -1,0 +1,29 @@
+INSERT INTO permissions (code, description)
+SELECT 'SATISFACTION_GERER', 'Gérer les enquêtes de satisfaction client'
+WHERE NOT EXISTS (
+    SELECT 1 FROM permissions WHERE code = 'SATISFACTION_GERER'
+);
+
+
+INSERT INTO role_permission (role_id, permission_id)
+SELECT
+    r.id AS role_id,
+    p.id AS permission_id
+FROM roles r
+JOIN permissions p ON p.code = 'SATISFACTION_GERER'
+LEFT JOIN role_permission rp
+    ON rp.role_id = r.id
+   AND rp.permission_id = p.id
+WHERE r.code IN ('ADMIN', 'SHOWROOM', 'TERRAIN', 'DIRECTION')
+  AND rp.role_id IS NULL;  -- évite les doublons
+INSERT INTO utilisateur_role (utilisateur_id, role_id)
+SELECT
+    u.id AS utilisateur_id,
+    r.id AS role_id
+FROM utilisateurs u
+JOIN roles r ON r.code = 'ADMIN'
+LEFT JOIN utilisateur_role ur
+    ON ur.utilisateur_id = u.id
+   AND ur.role_id = r.id
+WHERE u.login = 'admin'
+  AND ur.utilisateur_id IS NULL;
