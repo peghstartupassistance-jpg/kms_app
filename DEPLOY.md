@@ -48,12 +48,10 @@ Tip:
 
 ## Server-side structure
 
-- Domain root (public web): /home2/kdfvxvmy/public_html
-- App path: /kms_app → maps to https://kennemulti-services.com/kms_app
 
 Ensure this directory exists. If not, create `kms_app` under the domain root.
 
----
+CI trigger note: this line bumps deploy.
 
 ## Safety & best practices
 
