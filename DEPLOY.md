@@ -76,6 +76,6 @@ Ensure this directory exists. If not, create `kms_app` under the domain root.
 Note: CI deploy triggers automatically on pushes to `main`.
 
 Auto-trigger tip: any commit on `main` starts a new deploy.
-Target path (Bluehost): `public_html/kms_app` (relative to FTP root)
-Ensure folder `public_html/kms_app` exists before deploy.
+Target path (Bluehost): `/public_html/kms_app` (FTP chrooted to `/home2/kdfxvmy`)
+Ensure folder `kms_app` exists under `public_html` before deploy.
  
