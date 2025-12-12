@@ -77,4 +77,5 @@ Note: CI deploy triggers automatically on pushes to `main`.
 
 Auto-trigger tip: any commit on `main` starts a new deploy.
 Target path (Bluehost): `/home2/kdfxvmy/public_html/kms_app`
+Ensure folder `kms_app` exists under `public_html` before deploy.
  
