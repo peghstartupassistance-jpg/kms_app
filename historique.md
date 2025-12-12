@@ -1,8 +1,67 @@
-Skip to content
-Chat history
+# Historique du Projet KMS Gestion
 
+## 2025-12-12 â€” Industrialisation & DÃ©ploiement (Git + GitHub + CI/CD)
 
+### Contexte
+Le projet kms_app doit Ãªtre versionnÃ© et dÃ©ployÃ© automatiquement sur Bluehost Ã  l'URL https://kennemulti-services.com/kms_app.
 
+### Actions rÃ©alisÃ©es
+1. **Initialisation Git & GitHub**
+   - `git init` et premier commit "Initialisation du projet kms_app" (223 fichiers).
+   - CrÃ©ation du dÃ©pÃ´t GitHub : https://github.com/peghstartupassistance-jpg/kms_app
+   - Configuration Git global : nom (peghstartupassistance-jpg), email (peghstartup.assistance@gmail.com)
+   - Premier push sur `main`.
+
+2. **Configuration dÃ©ploiement local (VS Code SFTP)**
+   - Installation extension SFTP (liximomo).
+   - CrÃ©ation `.vscode/sftp.json` avec :
+     - Host: ftp.kdf.vxv.mybluehost.me
+     - Protocol: FTP (Explicit FTPS), port 21
+     - Username: admin@kennemulti-services.com
+     - Password: appKMs#1234
+     - `uploadOnSave: true` â†’ dÃ©ploiement automatique Ã  l'enregistrement
+   - `.vscode/` ajoutÃ© Ã  `.gitignore` pour Ã©viter versionner les credentials.
+
+3. **Configuration dÃ©ploiement CI (GitHub Actions)**
+   - CrÃ©ation `.github/workflows/ftp-deploy.yml` avec action SamKirkland/FTP-Deploy-Action.
+   - Secrets GitHub crÃ©Ã©s :
+     - `FTP_SERVER` = ftp.kennemulti-services.com
+     - `FTP_USERNAME` = admin@kennemulti-services.com
+     - `FTP_PASSWORD` = appKMs#1234
+     - `FTP_REMOTE_DIR` = ItÃ©ration pour trouver le bon chemin.
+   - DÃ©ploiement automatique sur chaque `git push` vers `main`.
+
+4. **RÃ©solution des chemins FTP**
+   - Premier problÃ¨me : hÃ´te `ftp.kdf.vxv.mybluehost.me` ne rÃ©solvait pas depuis GitHub Actions â†’ changement en `ftp.kennemulti-services.com` âœ….
+   - DeuxiÃ¨me problÃ¨me : server-dir ne se terminait pas par `/` â†’ correction dans workflow âœ….
+   - TroisiÃ¨me problÃ¨me : chemin cible mal alignÃ© (multiple itÃ©rations) :
+     - Tentative `/public_html/kms_app` â†’ ne dÃ©ployait pas au bon endroit.
+     - Compte FTP chrootÃ© Ã  `/home2/kdfvxvmy/kennemulti-services.com/admin/`.
+     - Solution finale : forcer chemin absolu `/home2/kdfvxvmy/public_html/kms_app/` dans workflow.
+   - **Note** : compte FTP `admin@kennemulti-services.com` est actuellement chrootÃ© Ã  `/home2/kdfvxvmy/kennemulti-services.com/admin/`, ce qui explique les dÃ©ploiements au mauvais endroit. Ã€ amÃ©liorer : crÃ©er compte FTP dÃ©diÃ© avec racine `/home2/kdfvxvmy/public_html`.
+
+5. **DÃ©ploiement manuel temporaire**
+   - Le workflow CI force maintenant `/home2/kdfvxvmy/public_html/kms_app/`.
+   - Utilisateur a dÃ©placÃ© manuellement le projet dans `/home2/kdfvxvmy/public_html/kms_app` en attendant.
+   - âœ… DÃ©ploiement CI rÃ©ussi (job "Deploy to Bluehost (FTP)" succeeded).
+
+### Statut actuel
+- âœ… Git versionnÃ© sur GitHub (branche `main`).
+- âœ… CI/CD GitHub Actions configurÃ© (auto-deploy sur `git push`).
+- âœ… Upload local VS Code SFTP activÃ© (uploadOnSave).
+- âœ… Application accessible Ã  https://kennemulti-services.com/kms_app.
+- âŒ Erreur de connexion BD â†’ Ã  corriger (identifiants MySQL Bluehost).
+
+### Prochaines Ã©tapes
+1. Corriger `db/db.php` avec les identifiants MySQL Bluehost.
+2. CrÃ©er compte FTP dÃ©diÃ© "deploy" avec racine `/home2/kdfvxvmy/public_html` pour stabiliser le CI.
+3. Valider que l'application charge avec les bonnes permissions & modules.
+4. Fiabiliser le module comptabilitÃ© (OHADA).
+5. Documenter pour l'Ã©quipe.
+
+---
+
+## Historique antÃ©rieur
 
 You said:
 Uploaded image
@@ -43023,26 +43082,26 @@ Avec sÃ©parateurs visuels, icÃ´nes cohÃ©rentes, indentation sous-menus.
 
 ---
 
-## SESSION DU 11 DÉCEMBRE 2025 - FINALISATION INTERFACE & CORRECTIONS
+## SESSION DU 11 Dï¿½CEMBRE 2025 - FINALISATION INTERFACE & CORRECTIONS
 
-### 1. AMÉLIORATION SIDEBAR
+### 1. AMï¿½LIORATION SIDEBAR
 
-**Problème initial** : Sidebar avec accordéons Bootstrap ne fonctionnait pas sur toutes les pages
-- Bootstrap JS n'était pas chargé (footer.php vide)
-- Script d'accordéon tentait de s'exécuter avant le chargement de Bootstrap
+**Problï¿½me initial** : Sidebar avec accordï¿½ons Bootstrap ne fonctionnait pas sur toutes les pages
+- Bootstrap JS n'ï¿½tait pas chargï¿½ (footer.php vide)
+- Script d'accordï¿½on tentait de s'exï¿½cuter avant le chargement de Bootstrap
 
-**Solutions appliquées** :
+**Solutions appliquï¿½es** :
 1. Ajout de Bootstrap JS dans `partials/footer.php`
-2. Script pour gérer les icônes +/- sur les accordéons
-3. Multiples itérations de design :
+2. Script pour gï¿½rer les icï¿½nes +/- sur les accordï¿½ons
+3. Multiples itï¿½rations de design :
    - Version sombre avec gradient (background: linear-gradient)
-   - Version épurée blanche avec bordures subtiles
-   - **Version finale** : Liste plate sans accordéons, sections visuelles avec titres en uppercase gris
+   - Version ï¿½purï¿½e blanche avec bordures subtiles
+   - **Version finale** : Liste plate sans accordï¿½ons, sections visuelles avec titres en uppercase gris
 
-**Fichiers modifiés** :
-- `partials/footer.php` : Ajout Bootstrap 5.3.3 JS + script accordéon (puis supprimé)
-- `partials/sidebar.php` : Structure réinitialisée en liste plate avec `list-group`
-- `assets/css/custom.css` : Styles sidebar simplifiés (fond blanc, hover gris)
+**Fichiers modifiï¿½s** :
+- `partials/footer.php` : Ajout Bootstrap 5.3.3 JS + script accordï¿½on (puis supprimï¿½)
+- `partials/sidebar.php` : Structure rï¿½initialisï¿½e en liste plate avec `list-group`
+- `assets/css/custom.css` : Styles sidebar simplifiï¿½s (fond blanc, hover gris)
 
 **Structure finale sidebar** :
 \\\html
@@ -43059,10 +43118,10 @@ Avec sÃ©parateurs visuels, icÃ´nes cohÃ©rentes, indentation sous-menus.
 
 ### 2. FINALISATION MODULE COMMERCIAL
 
-**Création** : `commercial/dashboard.php` (nouveau fichier)
+**Crï¿½ation** : `commercial/dashboard.php` (nouveau fichier)
 
-**Fonctionnalités** :
-- **KPIs en temps réel** :
+**Fonctionnalitï¿½s** :
+- **KPIs en temps rï¿½el** :
   * Total clients / prospects
   * Devis du mois (avec en attente)
   * Ventes du mois + CA
@@ -43070,13 +43129,13 @@ Avec sÃ©parateurs visuels, icÃ´nes cohÃ©rentes, indentation sous-menus.
   * CA du jour avec nombre de ventes
 
 - **Tableaux** :
-  * Ventes récentes (7 derniers jours) avec statuts colorés
-  * Devis à relancer (> 3 jours sans réponse)
-  * Top 5 clients du mois avec médailles (or/argent/bronze)
+  * Ventes rï¿½centes (7 derniers jours) avec statuts colorï¿½s
+  * Devis ï¿½ relancer (> 3 jours sans rï¿½ponse)
+  * Top 5 clients du mois avec mï¿½dailles (or/argent/bronze)
 
-**Requêtes SQL clés** :
+**Requï¿½tes SQL clï¿½s** :
 \\\sql
--- Ventes récentes
+-- Ventes rï¿½centes
 SELECT v.*, c.nom as client_nom, cv.libelle as canal_nom
 FROM ventes v
 JOIN clients c ON c.id = v.client_id
@@ -43093,7 +43152,7 @@ GROUP BY c.id
 ORDER BY ca_total DESC LIMIT 5
 \\\
 
-### 3. CORRECTIONS MODULE COMPTABILITÉ
+### 3. CORRECTIONS MODULE COMPTABILITï¿½
 
 #### 3.1 Dashboard Marketing (`reporting/dashboard_marketing.php`)
 
@@ -43106,7 +43165,7 @@ ORDER BY ca_total DESC LIMIT 5
 -- Avant (INCORRECT)
 SUM(CASE WHEN vs.converti_en_devis = 1 THEN 1 ELSE 0 END) as nb_convertis_devis
 
--- Après (CORRECT)
+-- Aprï¿½s (CORRECT)
 SELECT 
     COUNT(DISTINCT vs.id) as nb_visiteurs,
     COUNT(DISTINCT CASE WHEN d.id IS NOT NULL THEN vs.client_id END) as nb_convertis_devis,
@@ -43117,9 +43176,9 @@ LEFT JOIN ventes v ON vs.client_id = v.client_id AND v.date_vente BETWEEN :d9 AN
 WHERE vs.date_visite BETWEEN :debut AND :fin
 \\\
 
-**Problème supplémentaire** : `Invalid parameter number` - Paramètres PDO dupliqués
+**Problï¿½me supplï¿½mentaire** : `Invalid parameter number` - Paramï¿½tres PDO dupliquï¿½s
 
-**Solution** : Créer des paramètres uniques :d1, :d2, ..., :d14
+**Solution** : Crï¿½er des paramï¿½tres uniques :d1, :d2, ..., :d14
 
 #### 3.2 Export Balance (`compta/export_balance.php`)
 
@@ -43133,17 +43192,17 @@ WHERE vs.date_visite BETWEEN :debut AND :fin
 // 1. Corriger nom colonne SQL
 SELECT c.numero_compte  -- au lieu de c.numero
 
-// 2. Forcer PDO::FETCH_ASSOC et sélectionner colonnes explicites
+// 2. Forcer PDO::FETCH_ASSOC et sï¿½lectionner colonnes explicites
 \ = \->prepare("SELECT id, code, date_debut, date_fin, est_actif FROM compta_exercices WHERE id = ?");
 \ = \->fetch(PDO::FETCH_ASSOC);
 
-// 3. Utiliser la bonne clé array
+// 3. Utiliser la bonne clï¿½ array
 \['numero_compte']  // au lieu de \['numero']
 \\\
 
 #### 3.3 Export Bilan (`compta/export_bilan.php`)
 
-**Erreur** : Même problème `cc.numero` ? `cc.numero_compte`
+**Erreur** : Mï¿½me problï¿½me `cc.numero` ? `cc.numero_compte`
 
 **Solution** : Remplacement dans 2 sections (ACTIF + PASSIF) :
 \\\php
@@ -43154,64 +43213,64 @@ SELECT c.numero_compte  -- au lieu de c.numero
 <td><?= htmlspecialchars(\['numero_compte']) ?></td>
 \\\
 
-### 4. RÉCAPITULATIF FICHIERS MODIFIÉS
+### 4. Rï¿½CAPITULATIF FICHIERS MODIFIï¿½S
 
 | Fichier | Type | Modification |
 |---------|------|-------------|
-| `partials/sidebar.php` | Refonte | Liste plate, sections visuelles, suppression accordéons |
-| `partials/footer.php` | Ajout | Bootstrap JS (puis nettoyé) |
-| `assets/css/custom.css` | CSS | Styles sidebar épurés |
+| `partials/sidebar.php` | Refonte | Liste plate, sections visuelles, suppression accordï¿½ons |
+| `partials/footer.php` | Ajout | Bootstrap JS (puis nettoyï¿½) |
+| `assets/css/custom.css` | CSS | Styles sidebar ï¿½purï¿½s |
 | `commercial/dashboard.php` | **NOUVEAU** | Dashboard commercial avec KPIs |
-| `reporting/dashboard_marketing.php` | Correction | LEFT JOIN pour conversions, paramètres uniques |
+| `reporting/dashboard_marketing.php` | Correction | LEFT JOIN pour conversions, paramï¿½tres uniques |
 | `compta/export_balance.php` | Correction | numero ? numero_compte, PDO::FETCH_ASSOC |
 | `compta/export_bilan.php` | Correction | numero ? numero_compte (ACTIF + PASSIF) |
-| `reporting/relances_devis.php` | Correction | Script déplacé après footer.php, DOMContentLoaded |
+| `reporting/relances_devis.php` | Correction | Script dï¿½placï¿½ aprï¿½s footer.php, DOMContentLoaded |
 
 ### 5. ARCHITECTURE TECHNIQUE FINALE
 
 **Sidebar** :
-- Structure : List-group plate (pas d'accordéons)
+- Structure : List-group plate (pas d'accordï¿½ons)
 - Design : Fond blanc, bordure droite grise
 - Sections : Titres uppercase gris (`sidebar-section-title`)
-- Hover : Fond gris clair, icônes bleues
+- Hover : Fond gris clair, icï¿½nes bleues
 - Largeur : 250px fixe
 - Scrollbar : Custom 5px, grise transparente
 
 **Module Commercial** :
-- Dashboard centralisé : `commercial/dashboard.php`
-- 4 KPIs principaux en cards colorées
-- 3 tableaux : Ventes récentes, Devis à relancer, Top clients
-- Période : Jour actuel + Mois actuel
+- Dashboard centralisï¿½ : `commercial/dashboard.php`
+- 4 KPIs principaux en cards colorï¿½es
+- 3 tableaux : Ventes rï¿½centes, Devis ï¿½ relancer, Top clients
+- Pï¿½riode : Jour actuel + Mois actuel
 - Badges dynamiques pour statuts (warning, info, success, danger)
 
-**Module Comptabilité** :
-- Nom colonne standardisé : `numero_compte` (pas `numero`)
+**Module Comptabilitï¿½** :
+- Nom colonne standardisï¿½ : `numero_compte` (pas `numero`)
 - Exercice : Colonnes `code`, `date_debut`, `date_fin` requises
 - Exports : CSV UTF-8 avec BOM (Excel-compatible)
 - Balance : Classe SYSCOHADA (1-9)
 - Bilan : ACTIF (2,3,4d,5d) / PASSIF (1,4c,5c)
 
-### 6. TESTS VALIDÉS
+### 6. TESTS VALIDï¿½S
 
 ? Sidebar visible sur toutes les pages
 ? Tous les liens fonctionnels
-? Dashboard commercial opérationnel
+? Dashboard commercial opï¿½rationnel
 ? Exports comptables sans warnings
-? Balance exportée en CSV
-? Bilan affiché avec numéros de compte
-? Dashboard marketing avec conversions calculées
+? Balance exportï¿½e en CSV
+? Bilan affichï¿½ avec numï¿½ros de compte
+? Dashboard marketing avec conversions calculï¿½es
 
-### 7. BONNES PRATIQUES APPLIQUÉES
+### 7. BONNES PRATIQUES APPLIQUï¿½ES
 
-1. **PDO** : Toujours `PDO::FETCH_ASSOC` pour éviter ambiguïtés
-2. **Paramètres PDO** : Noms uniques (:d1, :d2, ...) si réutilisation
-3. **Colonnes SQL** : Vérifier structure table (DESCRIBE) avant requête
+1. **PDO** : Toujours `PDO::FETCH_ASSOC` pour ï¿½viter ambiguï¿½tï¿½s
+2. **Paramï¿½tres PDO** : Noms uniques (:d1, :d2, ...) si rï¿½utilisation
+3. **Colonnes SQL** : Vï¿½rifier structure table (DESCRIBE) avant requï¿½te
 4. **Scripts JS** : Charger Bootstrap JS avant scripts custom
 5. **Footer inclusion** : Toujours AVANT scripts de page
-6. **CSV Export** : BOM UTF-8 + séparateur ; pour Excel
-7. **Sidebar** : Structure simple > accordéons complexes
+6. **CSV Export** : BOM UTF-8 + sï¿½parateur ; pour Excel
+7. **Sidebar** : Structure simple > accordï¿½ons complexes
 
 ---
 
-**FIN SESSION 11 DÉCEMBRE 2025**
+**FIN SESSION 11 Dï¿½CEMBRE 2025**
 
