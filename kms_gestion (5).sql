@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Hôte : 127.0.0.1
--- Généré le : jeu. 11 déc. 2025 à 19:23
--- Version du serveur : 10.4.32-MariaDB
--- Version de PHP : 8.2.12
+-- Host: 127.0.0.1
+-- Generation Time: Dec 12, 2025 at 07:16 PM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,13 +18,13 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Base de données : `kms_gestion`
+-- Database: `kms_gestion`
 --
 
 -- --------------------------------------------------------
 
 --
--- Structure de la table `achats`
+-- Table structure for table `achats`
 --
 
 CREATE TABLE `achats` (
@@ -42,7 +42,7 @@ CREATE TABLE `achats` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `achats`
+-- Dumping data for table `achats`
 --
 
 INSERT INTO `achats` (`id`, `numero`, `date_achat`, `fournisseur_nom`, `fournisseur_contact`, `montant_total_ht`, `montant_total_ttc`, `statut`, `utilisateur_id`, `commentaires`, `date_creation`) VALUES
@@ -53,7 +53,7 @@ INSERT INTO `achats` (`id`, `numero`, `date_achat`, `fournisseur_nom`, `fourniss
 -- --------------------------------------------------------
 
 --
--- Structure de la table `achats_lignes`
+-- Table structure for table `achats_lignes`
 --
 
 CREATE TABLE `achats_lignes` (
@@ -67,7 +67,7 @@ CREATE TABLE `achats_lignes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `achats_lignes`
+-- Dumping data for table `achats_lignes`
 --
 
 INSERT INTO `achats_lignes` (`id`, `achat_id`, `produit_id`, `quantite`, `prix_unitaire`, `remise`, `montant_ligne_ht`) VALUES
@@ -78,7 +78,7 @@ INSERT INTO `achats_lignes` (`id`, `achat_id`, `produit_id`, `quantite`, `prix_u
 -- --------------------------------------------------------
 
 --
--- Structure de la table `bons_livraison`
+-- Table structure for table `bons_livraison`
 --
 
 CREATE TABLE `bons_livraison` (
@@ -94,7 +94,7 @@ CREATE TABLE `bons_livraison` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `bons_livraison`
+-- Dumping data for table `bons_livraison`
 --
 
 INSERT INTO `bons_livraison` (`id`, `numero`, `date_bl`, `vente_id`, `client_id`, `transport_assure_par`, `observations`, `signe_client`, `magasinier_id`) VALUES
@@ -108,7 +108,7 @@ INSERT INTO `bons_livraison` (`id`, `numero`, `date_bl`, `vente_id`, `client_id`
 -- --------------------------------------------------------
 
 --
--- Structure de la table `bons_livraison_lignes`
+-- Table structure for table `bons_livraison_lignes`
 --
 
 CREATE TABLE `bons_livraison_lignes` (
@@ -119,7 +119,7 @@ CREATE TABLE `bons_livraison_lignes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `bons_livraison_lignes`
+-- Dumping data for table `bons_livraison_lignes`
 --
 
 INSERT INTO `bons_livraison_lignes` (`id`, `bon_livraison_id`, `produit_id`, `quantite`) VALUES
@@ -134,7 +134,7 @@ INSERT INTO `bons_livraison_lignes` (`id`, `bon_livraison_id`, `produit_id`, `qu
 -- --------------------------------------------------------
 
 --
--- Structure de la table `caisse_journal`
+-- Table structure for table `caisse_journal`
 --
 
 CREATE TABLE `caisse_journal` (
@@ -149,16 +149,17 @@ CREATE TABLE `caisse_journal` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Déchargement des données de la table `caisse_journal`
+-- Dumping data for table `caisse_journal`
 --
 
 INSERT INTO `caisse_journal` (`id`, `date_ecriture`, `sens`, `montant`, `source_type`, `source_id`, `commentaire`, `utilisateur_id`) VALUES
-(1, '2025-12-11 13:40:06', 'ENTREE', 89437.50, 'VENTE', 20, 'Vente ', 1);
+(1, '2025-12-11 13:40:06', 'ENTREE', 89437.50, 'VENTE', 20, 'Vente ', 1),
+(2, '2025-12-12 15:11:25', 'ENTREE', 1001700.00, 'VENTE', 21, 'Vente V-20251212-151125', 1);
 
 -- --------------------------------------------------------
 
 --
--- Structure de la table `canaux_vente`
+-- Table structure for table `canaux_vente`
 --
 
 CREATE TABLE `canaux_vente` (
@@ -168,7 +169,7 @@ CREATE TABLE `canaux_vente` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `canaux_vente`
+-- Dumping data for table `canaux_vente`
 --
 
 INSERT INTO `canaux_vente` (`id`, `code`, `libelle`) VALUES
@@ -181,7 +182,7 @@ INSERT INTO `canaux_vente` (`id`, `code`, `libelle`) VALUES
 -- --------------------------------------------------------
 
 --
--- Structure de la table `chambres`
+-- Table structure for table `chambres`
 --
 
 CREATE TABLE `chambres` (
@@ -193,7 +194,7 @@ CREATE TABLE `chambres` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `chambres`
+-- Dumping data for table `chambres`
 --
 
 INSERT INTO `chambres` (`id`, `code`, `description`, `tarif_nuite`, `actif`) VALUES
@@ -203,7 +204,7 @@ INSERT INTO `chambres` (`id`, `code`, `description`, `tarif_nuite`, `actif`) VAL
 -- --------------------------------------------------------
 
 --
--- Structure de la table `clients`
+-- Table structure for table `clients`
 --
 
 CREATE TABLE `clients` (
@@ -219,7 +220,7 @@ CREATE TABLE `clients` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `clients`
+-- Dumping data for table `clients`
 --
 
 INSERT INTO `clients` (`id`, `nom`, `type_client_id`, `telephone`, `email`, `adresse`, `source`, `statut`, `date_creation`) VALUES
@@ -233,7 +234,7 @@ INSERT INTO `clients` (`id`, `nom`, `type_client_id`, `telephone`, `email`, `adr
 -- --------------------------------------------------------
 
 --
--- Structure de la table `compta_comptes`
+-- Table structure for table `compta_comptes`
 --
 
 CREATE TABLE `compta_comptes` (
@@ -252,7 +253,7 @@ CREATE TABLE `compta_comptes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `compta_comptes`
+-- Dumping data for table `compta_comptes`
 --
 
 INSERT INTO `compta_comptes` (`id`, `numero_compte`, `libelle`, `classe`, `est_analytique`, `compte_parent_id`, `type_compte`, `nature`, `est_actif`, `observations`, `created_at`, `updated_at`) VALUES
@@ -369,7 +370,7 @@ INSERT INTO `compta_comptes` (`id`, `numero_compte`, `libelle`, `classe`, `est_a
 -- --------------------------------------------------------
 
 --
--- Structure de la table `compta_ecritures`
+-- Table structure for table `compta_ecritures`
 --
 
 CREATE TABLE `compta_ecritures` (
@@ -388,7 +389,7 @@ CREATE TABLE `compta_ecritures` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `compta_ecritures`
+-- Dumping data for table `compta_ecritures`
 --
 
 INSERT INTO `compta_ecritures` (`id`, `piece_id`, `compte_id`, `libelle_ecriture`, `debit`, `credit`, `tiers_client_id`, `tiers_fournisseur_id`, `centre_analytique_id`, `ordre_ligne`, `observations`, `created_at`) VALUES
@@ -448,7 +449,7 @@ INSERT INTO `compta_ecritures` (`id`, `piece_id`, `compte_id`, `libelle_ecriture
 -- --------------------------------------------------------
 
 --
--- Structure de la table `compta_exercices`
+-- Table structure for table `compta_exercices`
 --
 
 CREATE TABLE `compta_exercices` (
@@ -463,7 +464,7 @@ CREATE TABLE `compta_exercices` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `compta_exercices`
+-- Dumping data for table `compta_exercices`
 --
 
 INSERT INTO `compta_exercices` (`id`, `annee`, `date_ouverture`, `date_cloture`, `est_clos`, `observations`, `created_at`, `updated_at`) VALUES
@@ -473,7 +474,7 @@ INSERT INTO `compta_exercices` (`id`, `annee`, `date_ouverture`, `date_cloture`,
 -- --------------------------------------------------------
 
 --
--- Structure de la table `compta_journaux`
+-- Table structure for table `compta_journaux`
 --
 
 CREATE TABLE `compta_journaux` (
@@ -488,7 +489,7 @@ CREATE TABLE `compta_journaux` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `compta_journaux`
+-- Dumping data for table `compta_journaux`
 --
 
 INSERT INTO `compta_journaux` (`id`, `code`, `libelle`, `type`, `compte_contre_partie`, `observations`, `created_at`, `updated_at`) VALUES
@@ -501,7 +502,7 @@ INSERT INTO `compta_journaux` (`id`, `code`, `libelle`, `type`, `compte_contre_p
 -- --------------------------------------------------------
 
 --
--- Structure de la table `compta_mapping_operations`
+-- Table structure for table `compta_mapping_operations`
 --
 
 CREATE TABLE `compta_mapping_operations` (
@@ -518,7 +519,7 @@ CREATE TABLE `compta_mapping_operations` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `compta_mapping_operations`
+-- Dumping data for table `compta_mapping_operations`
 --
 
 INSERT INTO `compta_mapping_operations` (`id`, `source_type`, `code_operation`, `journal_id`, `compte_debit_id`, `compte_credit_id`, `description`, `actif`, `created_at`, `updated_at`) VALUES
@@ -528,7 +529,7 @@ INSERT INTO `compta_mapping_operations` (`id`, `source_type`, `code_operation`, 
 -- --------------------------------------------------------
 
 --
--- Structure de la table `compta_operations_trace`
+-- Table structure for table `compta_operations_trace`
 --
 
 CREATE TABLE `compta_operations_trace` (
@@ -543,7 +544,7 @@ CREATE TABLE `compta_operations_trace` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `compta_operations_trace`
+-- Dumping data for table `compta_operations_trace`
 --
 
 INSERT INTO `compta_operations_trace` (`id`, `source_type`, `source_id`, `piece_id`, `status`, `messages`, `executed_at`, `created_at`) VALUES
@@ -562,7 +563,7 @@ INSERT INTO `compta_operations_trace` (`id`, `source_type`, `source_id`, `piece_
 -- --------------------------------------------------------
 
 --
--- Structure de la table `compta_pieces`
+-- Table structure for table `compta_pieces`
 --
 
 CREATE TABLE `compta_pieces` (
@@ -582,7 +583,7 @@ CREATE TABLE `compta_pieces` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `compta_pieces`
+-- Dumping data for table `compta_pieces`
 --
 
 INSERT INTO `compta_pieces` (`id`, `exercice_id`, `journal_id`, `numero_piece`, `date_piece`, `reference_type`, `reference_id`, `tiers_client_id`, `tiers_fournisseur_id`, `observations`, `est_validee`, `created_at`, `updated_at`) VALUES
@@ -616,7 +617,7 @@ INSERT INTO `compta_pieces` (`id`, `exercice_id`, `journal_id`, `numero_piece`, 
 -- --------------------------------------------------------
 
 --
--- Structure de la table `connexions_utilisateur`
+-- Table structure for table `connexions_utilisateur`
 --
 
 CREATE TABLE `connexions_utilisateur` (
@@ -629,7 +630,7 @@ CREATE TABLE `connexions_utilisateur` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `connexions_utilisateur`
+-- Dumping data for table `connexions_utilisateur`
 --
 
 INSERT INTO `connexions_utilisateur` (`id`, `utilisateur_id`, `date_connexion`, `adresse_ip`, `user_agent`, `succes`) VALUES
@@ -666,12 +667,14 @@ INSERT INTO `connexions_utilisateur` (`id`, `utilisateur_id`, `date_connexion`, 
 (30, 1, '2025-12-11 11:33:37', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0', 1),
 (31, 1, '2025-12-11 11:48:04', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0', 1),
 (32, 1, '2025-12-11 12:49:35', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0', 1),
-(33, 1, '2025-12-11 12:51:55', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0', 1);
+(33, 1, '2025-12-11 12:51:55', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0', 1),
+(34, 1, '2025-12-12 15:03:13', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0', 1),
+(35, 1, '2025-12-12 15:26:26', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0', 1);
 
 -- --------------------------------------------------------
 
 --
--- Structure de la table `conversions_pipeline`
+-- Table structure for table `conversions_pipeline`
 --
 
 CREATE TABLE `conversions_pipeline` (
@@ -688,7 +691,7 @@ CREATE TABLE `conversions_pipeline` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `devis`
+-- Table structure for table `devis`
 --
 
 CREATE TABLE `devis` (
@@ -709,7 +712,7 @@ CREATE TABLE `devis` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `devis`
+-- Dumping data for table `devis`
 --
 
 INSERT INTO `devis` (`id`, `numero`, `date_devis`, `client_id`, `canal_vente_id`, `statut`, `est_converti`, `date_relance`, `utilisateur_id`, `montant_total_ht`, `montant_total_ttc`, `remise_global`, `conditions`, `commentaires`) VALUES
@@ -722,7 +725,7 @@ INSERT INTO `devis` (`id`, `numero`, `date_devis`, `client_id`, `canal_vente_id`
 -- --------------------------------------------------------
 
 --
--- Structure de la table `devis_lignes`
+-- Table structure for table `devis_lignes`
 --
 
 CREATE TABLE `devis_lignes` (
@@ -736,7 +739,7 @@ CREATE TABLE `devis_lignes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `devis_lignes`
+-- Dumping data for table `devis_lignes`
 --
 
 INSERT INTO `devis_lignes` (`id`, `devis_id`, `produit_id`, `quantite`, `prix_unitaire`, `remise`, `montant_ligne_ht`) VALUES
@@ -751,7 +754,7 @@ INSERT INTO `devis_lignes` (`id`, `devis_id`, `produit_id`, `quantite`, `prix_un
 -- --------------------------------------------------------
 
 --
--- Structure de la table `familles_produits`
+-- Table structure for table `familles_produits`
 --
 
 CREATE TABLE `familles_produits` (
@@ -760,7 +763,7 @@ CREATE TABLE `familles_produits` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `familles_produits`
+-- Dumping data for table `familles_produits`
 --
 
 INSERT INTO `familles_produits` (`id`, `nom`) VALUES
@@ -772,7 +775,7 @@ INSERT INTO `familles_produits` (`id`, `nom`) VALUES
 -- --------------------------------------------------------
 
 --
--- Structure de la table `formations`
+-- Table structure for table `formations`
 --
 
 CREATE TABLE `formations` (
@@ -783,7 +786,7 @@ CREATE TABLE `formations` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `formations`
+-- Dumping data for table `formations`
 --
 
 INSERT INTO `formations` (`id`, `nom`, `description`, `tarif_total`) VALUES
@@ -793,7 +796,7 @@ INSERT INTO `formations` (`id`, `nom`, `description`, `tarif_total`) VALUES
 -- --------------------------------------------------------
 
 --
--- Structure de la table `fournisseurs`
+-- Table structure for table `fournisseurs`
 --
 
 CREATE TABLE `fournisseurs` (
@@ -806,7 +809,7 @@ CREATE TABLE `fournisseurs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `fournisseurs`
+-- Dumping data for table `fournisseurs`
 --
 
 INSERT INTO `fournisseurs` (`id`, `nom`, `contact`, `telephone`, `email`, `adresse`) VALUES
@@ -816,7 +819,7 @@ INSERT INTO `fournisseurs` (`id`, `nom`, `contact`, `telephone`, `email`, `adres
 -- --------------------------------------------------------
 
 --
--- Structure de la table `inscriptions_formation`
+-- Table structure for table `inscriptions_formation`
 --
 
 CREATE TABLE `inscriptions_formation` (
@@ -830,7 +833,7 @@ CREATE TABLE `inscriptions_formation` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `inscriptions_formation`
+-- Dumping data for table `inscriptions_formation`
 --
 
 INSERT INTO `inscriptions_formation` (`id`, `date_inscription`, `apprenant_nom`, `client_id`, `formation_id`, `montant_paye`, `solde_du`) VALUES
@@ -841,7 +844,7 @@ INSERT INTO `inscriptions_formation` (`id`, `date_inscription`, `apprenant_nom`,
 -- --------------------------------------------------------
 
 --
--- Structure de la table `journal_caisse`
+-- Table structure for table `journal_caisse`
 --
 
 CREATE TABLE `journal_caisse` (
@@ -865,7 +868,7 @@ CREATE TABLE `journal_caisse` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `journal_caisse`
+-- Dumping data for table `journal_caisse`
 --
 
 INSERT INTO `journal_caisse` (`id`, `date_operation`, `numero_piece`, `nature_operation`, `client_id`, `fournisseur_id`, `sens`, `montant`, `mode_paiement_id`, `vente_id`, `reservation_id`, `inscription_formation_id`, `responsable_encaissement_id`, `observations`, `est_annule`, `date_annulation`, `annule_par_id`) VALUES
@@ -880,7 +883,7 @@ INSERT INTO `journal_caisse` (`id`, `date_operation`, `numero_piece`, `nature_op
 -- --------------------------------------------------------
 
 --
--- Structure de la table `kpis_quotidiens`
+-- Table structure for table `kpis_quotidiens`
 --
 
 CREATE TABLE `kpis_quotidiens` (
@@ -898,7 +901,7 @@ CREATE TABLE `kpis_quotidiens` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `leads_digital`
+-- Table structure for table `leads_digital`
 --
 
 CREATE TABLE `leads_digital` (
@@ -927,7 +930,7 @@ CREATE TABLE `leads_digital` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `modes_paiement`
+-- Table structure for table `modes_paiement`
 --
 
 CREATE TABLE `modes_paiement` (
@@ -937,7 +940,7 @@ CREATE TABLE `modes_paiement` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `modes_paiement`
+-- Dumping data for table `modes_paiement`
 --
 
 INSERT INTO `modes_paiement` (`id`, `code`, `libelle`) VALUES
@@ -949,7 +952,7 @@ INSERT INTO `modes_paiement` (`id`, `code`, `libelle`) VALUES
 -- --------------------------------------------------------
 
 --
--- Structure de la table `mouvements_stock_backup_20251209_161710`
+-- Table structure for table `mouvements_stock_backup_20251209_161710`
 --
 
 CREATE TABLE `mouvements_stock_backup_20251209_161710` (
@@ -966,7 +969,7 @@ CREATE TABLE `mouvements_stock_backup_20251209_161710` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `mouvements_stock_backup_20251209_161710`
+-- Dumping data for table `mouvements_stock_backup_20251209_161710`
 --
 
 INSERT INTO `mouvements_stock_backup_20251209_161710` (`id`, `date_mouvement`, `type_mouvement`, `produit_id`, `quantite`, `source_module`, `source_id`, `utilisateur_id`, `commentaire`, `date_creation`) VALUES
@@ -978,7 +981,7 @@ INSERT INTO `mouvements_stock_backup_20251209_161710` (`id`, `date_mouvement`, `
 -- --------------------------------------------------------
 
 --
--- Structure de la table `objectifs_commerciaux`
+-- Table structure for table `objectifs_commerciaux`
 --
 
 CREATE TABLE `objectifs_commerciaux` (
@@ -997,7 +1000,7 @@ CREATE TABLE `objectifs_commerciaux` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `ordres_preparation`
+-- Table structure for table `ordres_preparation`
 --
 
 CREATE TABLE `ordres_preparation` (
@@ -1021,16 +1024,17 @@ CREATE TABLE `ordres_preparation` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Ordres de préparation (liaison marketing-magasin)';
 
 --
--- Déchargement des données de la table `ordres_preparation`
+-- Dumping data for table `ordres_preparation`
 --
 
 INSERT INTO `ordres_preparation` (`id`, `numero_ordre`, `date_ordre`, `vente_id`, `devis_id`, `client_id`, `type_commande`, `commercial_responsable_id`, `statut`, `date_preparation_demandee`, `priorite`, `observations`, `signature_resp_marketing`, `date_signature_marketing`, `magasinier_id`, `date_preparation_effectuee`, `date_creation`) VALUES
-(4, 'OP-20251211-0001', '2025-12-11', 18, NULL, 6, 'VENTE_SHOWROOM', 1, 'EN_ATTENTE', '2025-12-13', 'NORMALE', '', 0, NULL, NULL, NULL, '2025-12-11 13:08:40');
+(4, 'OP-20251211-0001', '2025-12-11', 18, NULL, 6, 'VENTE_SHOWROOM', 1, 'EN_ATTENTE', '2025-12-13', 'NORMALE', '', 0, NULL, NULL, NULL, '2025-12-11 13:08:40'),
+(5, 'OP-20251212-0001', '2025-12-12', 13, NULL, 2, 'VENTE_SHOWROOM', 1, 'EN_ATTENTE', '2025-12-13', 'NORMALE', '', 0, NULL, NULL, NULL, '2025-12-12 15:06:08');
 
 -- --------------------------------------------------------
 
 --
--- Structure de la table `ordres_preparation_lignes`
+-- Table structure for table `ordres_preparation_lignes`
 --
 
 CREATE TABLE `ordres_preparation_lignes` (
@@ -1045,7 +1049,7 @@ CREATE TABLE `ordres_preparation_lignes` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `permissions`
+-- Table structure for table `permissions`
 --
 
 CREATE TABLE `permissions` (
@@ -1055,7 +1059,7 @@ CREATE TABLE `permissions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `permissions`
+-- Dumping data for table `permissions`
 --
 
 INSERT INTO `permissions` (`id`, `code`, `description`) VALUES
@@ -1086,7 +1090,7 @@ INSERT INTO `permissions` (`id`, `code`, `description`) VALUES
 -- --------------------------------------------------------
 
 --
--- Structure de la table `produits`
+-- Table structure for table `produits`
 --
 
 CREATE TABLE `produits` (
@@ -1110,7 +1114,7 @@ CREATE TABLE `produits` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `produits`
+-- Dumping data for table `produits`
 --
 
 INSERT INTO `produits` (`id`, `code_produit`, `famille_id`, `sous_categorie_id`, `designation`, `caracteristiques`, `description`, `fournisseur_id`, `localisation`, `prix_achat`, `prix_vente`, `stock_actuel`, `seuil_alerte`, `image_path`, `actif`, `date_creation`, `date_modification`) VALUES
@@ -1125,7 +1129,7 @@ INSERT INTO `produits` (`id`, `code_produit`, `famille_id`, `sous_categorie_id`,
 -- --------------------------------------------------------
 
 --
--- Structure de la table `promotions`
+-- Table structure for table `promotions`
 --
 
 CREATE TABLE `promotions` (
@@ -1142,7 +1146,7 @@ CREATE TABLE `promotions` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `promotion_produit`
+-- Table structure for table `promotion_produit`
 --
 
 CREATE TABLE `promotion_produit` (
@@ -1153,7 +1157,7 @@ CREATE TABLE `promotion_produit` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `prospections_terrain`
+-- Table structure for table `prospections_terrain`
 --
 
 CREATE TABLE `prospections_terrain` (
@@ -1174,16 +1178,18 @@ CREATE TABLE `prospections_terrain` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `prospections_terrain`
+-- Dumping data for table `prospections_terrain`
 --
 
 INSERT INTO `prospections_terrain` (`id`, `date_prospection`, `heure_prospection`, `prospect_nom`, `secteur`, `latitude`, `longitude`, `adresse_gps`, `besoin_identifie`, `action_menee`, `resultat`, `prochaine_etape`, `client_id`, `commercial_id`) VALUES
-(1, '2025-12-11', '12:26:30', 'MR Yves', 'Pindo', 4.05880337, 9.78497912, 'Pindo, Douala III, Communauté urbaine de Douala, Wouri, Région du Littoral, Cameroun', 'Deligneuse', 'Prospection et remise de la fiche produit', 'Intéressé - À recontacter', 'relancer', NULL, 1);
+(1, '2025-12-11', '12:26:30', 'MR Yves', 'Pindo', 4.05880337, 9.78497912, 'Pindo, Douala III, Communauté urbaine de Douala, Wouri, Région du Littoral, Cameroun', 'Deligneuse', 'Prospection et remise de la fiche produit', 'Intéressé - À recontacter', 'relancer', NULL, 1),
+(2, '2025-12-12', '15:17:00', 'Zoboo', 'Ndogmbe', 4.04000000, 9.75000000, 'Ndogmbe, Douala III, Communauté urbaine de Douala, Wouri, Littoral, Cameroon', 'machines de ménuiserie', 'prospection et prise de rendez-vous au centre commercial', 'À rappeler plus tard', 'Relancer dans une semaine', NULL, 1),
+(3, '2025-12-12', '15:24:38', 'Kossi', 'Non renseigné', 4.04000000, 9.75000000, NULL, 'efezfe', 'fezfzeefd', 'Devis demandé', 'zerfzfze', NULL, 1);
 
 -- --------------------------------------------------------
 
 --
--- Structure de la table `prospects_formation`
+-- Table structure for table `prospects_formation`
 --
 
 CREATE TABLE `prospects_formation` (
@@ -1198,7 +1204,7 @@ CREATE TABLE `prospects_formation` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `prospects_formation`
+-- Dumping data for table `prospects_formation`
 --
 
 INSERT INTO `prospects_formation` (`id`, `date_prospect`, `nom_prospect`, `contact`, `source`, `statut_actuel`, `client_id`, `utilisateur_id`) VALUES
@@ -1207,7 +1213,7 @@ INSERT INTO `prospects_formation` (`id`, `date_prospect`, `nom_prospect`, `conta
 -- --------------------------------------------------------
 
 --
--- Structure de la table `relances_devis`
+-- Table structure for table `relances_devis`
 --
 
 CREATE TABLE `relances_devis` (
@@ -1225,7 +1231,7 @@ CREATE TABLE `relances_devis` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `rendezvous_terrain`
+-- Table structure for table `rendezvous_terrain`
 --
 
 CREATE TABLE `rendezvous_terrain` (
@@ -1243,7 +1249,7 @@ CREATE TABLE `rendezvous_terrain` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `reservations_hotel`
+-- Table structure for table `reservations_hotel`
 --
 
 CREATE TABLE `reservations_hotel` (
@@ -1261,7 +1267,7 @@ CREATE TABLE `reservations_hotel` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `reservations_hotel`
+-- Dumping data for table `reservations_hotel`
 --
 
 INSERT INTO `reservations_hotel` (`id`, `date_reservation`, `client_id`, `chambre_id`, `date_debut`, `date_fin`, `nb_nuits`, `montant_total`, `statut`, `mode_paiement_id`, `concierge_id`) VALUES
@@ -1271,7 +1277,7 @@ INSERT INTO `reservations_hotel` (`id`, `date_reservation`, `client_id`, `chambr
 -- --------------------------------------------------------
 
 --
--- Structure de la table `retours_litiges`
+-- Table structure for table `retours_litiges`
 --
 
 CREATE TABLE `retours_litiges` (
@@ -1293,7 +1299,7 @@ CREATE TABLE `retours_litiges` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `roles`
+-- Table structure for table `roles`
 --
 
 CREATE TABLE `roles` (
@@ -1304,7 +1310,7 @@ CREATE TABLE `roles` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `roles`
+-- Dumping data for table `roles`
 --
 
 INSERT INTO `roles` (`id`, `code`, `nom`, `description`) VALUES
@@ -1318,7 +1324,7 @@ INSERT INTO `roles` (`id`, `code`, `nom`, `description`) VALUES
 -- --------------------------------------------------------
 
 --
--- Structure de la table `role_permission`
+-- Table structure for table `role_permission`
 --
 
 CREATE TABLE `role_permission` (
@@ -1327,7 +1333,7 @@ CREATE TABLE `role_permission` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `role_permission`
+-- Dumping data for table `role_permission`
 --
 
 INSERT INTO `role_permission` (`role_id`, `permission_id`) VALUES
@@ -1392,7 +1398,7 @@ INSERT INTO `role_permission` (`role_id`, `permission_id`) VALUES
 -- --------------------------------------------------------
 
 --
--- Structure de la table `ruptures_signalees`
+-- Table structure for table `ruptures_signalees`
 --
 
 CREATE TABLE `ruptures_signalees` (
@@ -1413,7 +1419,7 @@ CREATE TABLE `ruptures_signalees` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `ruptures_stock`
+-- Table structure for table `ruptures_stock`
 --
 
 CREATE TABLE `ruptures_stock` (
@@ -1430,7 +1436,7 @@ CREATE TABLE `ruptures_stock` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `satisfaction_clients`
+-- Table structure for table `satisfaction_clients`
 --
 
 CREATE TABLE `satisfaction_clients` (
@@ -1445,7 +1451,7 @@ CREATE TABLE `satisfaction_clients` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `satisfaction_clients`
+-- Dumping data for table `satisfaction_clients`
 --
 
 INSERT INTO `satisfaction_clients` (`id`, `date_satisfaction`, `client_id`, `nom_client`, `service_utilise`, `note`, `commentaire`, `utilisateur_id`) VALUES
@@ -1455,7 +1461,7 @@ INSERT INTO `satisfaction_clients` (`id`, `date_satisfaction`, `client_id`, `nom
 -- --------------------------------------------------------
 
 --
--- Structure de la table `sous_categories_produits`
+-- Table structure for table `sous_categories_produits`
 --
 
 CREATE TABLE `sous_categories_produits` (
@@ -1465,7 +1471,7 @@ CREATE TABLE `sous_categories_produits` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `sous_categories_produits`
+-- Dumping data for table `sous_categories_produits`
 --
 
 INSERT INTO `sous_categories_produits` (`id`, `famille_id`, `nom`) VALUES
@@ -1478,7 +1484,7 @@ INSERT INTO `sous_categories_produits` (`id`, `famille_id`, `nom`) VALUES
 -- --------------------------------------------------------
 
 --
--- Structure de la table `stocks_mouvements`
+-- Table structure for table `stocks_mouvements`
 --
 
 CREATE TABLE `stocks_mouvements` (
@@ -1494,7 +1500,7 @@ CREATE TABLE `stocks_mouvements` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `stocks_mouvements`
+-- Dumping data for table `stocks_mouvements`
 --
 
 INSERT INTO `stocks_mouvements` (`id`, `produit_id`, `date_mouvement`, `type_mouvement`, `quantite`, `source_type`, `source_id`, `commentaire`, `utilisateur_id`) VALUES
@@ -1526,7 +1532,7 @@ INSERT INTO `stocks_mouvements` (`id`, `produit_id`, `date_mouvement`, `type_mou
 -- --------------------------------------------------------
 
 --
--- Structure de la table `types_client`
+-- Table structure for table `types_client`
 --
 
 CREATE TABLE `types_client` (
@@ -1536,7 +1542,7 @@ CREATE TABLE `types_client` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `types_client`
+-- Dumping data for table `types_client`
 --
 
 INSERT INTO `types_client` (`id`, `code`, `libelle`) VALUES
@@ -1549,7 +1555,7 @@ INSERT INTO `types_client` (`id`, `code`, `libelle`) VALUES
 -- --------------------------------------------------------
 
 --
--- Structure de la table `upsell_hotel`
+-- Table structure for table `upsell_hotel`
 --
 
 CREATE TABLE `upsell_hotel` (
@@ -1562,7 +1568,7 @@ CREATE TABLE `upsell_hotel` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `utilisateurs`
+-- Table structure for table `utilisateurs`
 --
 
 CREATE TABLE `utilisateurs` (
@@ -1578,11 +1584,11 @@ CREATE TABLE `utilisateurs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `utilisateurs`
+-- Dumping data for table `utilisateurs`
 --
 
 INSERT INTO `utilisateurs` (`id`, `login`, `mot_de_passe_hash`, `nom_complet`, `email`, `telephone`, `actif`, `date_creation`, `date_derniere_connexion`) VALUES
-(1, 'admin', '$2b$10$j6YYUX.QLOxOoBn9eB4rJu8/ye4/NOEXPvRjcYhUY4mBiaZZFUrTi', 'Administrateur KMS', 'admin@kms.local', NULL, 1, '2025-11-18 10:59:28', '2025-12-11 12:51:55'),
+(1, 'admin', '$2b$10$j6YYUX.QLOxOoBn9eB4rJu8/ye4/NOEXPvRjcYhUY4mBiaZZFUrTi', 'Administrateur KMS', 'admin@kms.local', NULL, 1, '2025-11-18 10:59:28', '2025-12-12 15:26:26'),
 (2, 'admin2', '$2y$10$G6sGiMHX75v9PYTAqIZCPObMQV.3InGlXpNGyrKWKK/gM8iln0Tfu', 'Administrateur Système', 'admin2@kms.local', NULL, 1, '2025-12-11 11:56:20', NULL),
 (3, 'showroom1', '$2y$10$G6sGiMHX75v9PYTAqIZCPObMQV.3InGlXpNGyrKWKK/gM8iln0Tfu', 'Marie Kouadio', 'marie.kouadio@kms.local', NULL, 1, '2025-12-11 11:56:20', NULL),
 (4, 'showroom2', '$2y$10$G6sGiMHX75v9PYTAqIZCPObMQV.3InGlXpNGyrKWKK/gM8iln0Tfu', 'Yao Kouassi', 'yao.kouassi@kms.local', NULL, 1, '2025-12-11 11:56:20', NULL),
@@ -1600,7 +1606,7 @@ INSERT INTO `utilisateurs` (`id`, `login`, `mot_de_passe_hash`, `nom_complet`, `
 -- --------------------------------------------------------
 
 --
--- Structure de la table `utilisateur_role`
+-- Table structure for table `utilisateur_role`
 --
 
 CREATE TABLE `utilisateur_role` (
@@ -1609,7 +1615,7 @@ CREATE TABLE `utilisateur_role` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `utilisateur_role`
+-- Dumping data for table `utilisateur_role`
 --
 
 INSERT INTO `utilisateur_role` (`utilisateur_id`, `role_id`) VALUES
@@ -1632,7 +1638,7 @@ INSERT INTO `utilisateur_role` (`utilisateur_id`, `role_id`) VALUES
 -- --------------------------------------------------------
 
 --
--- Structure de la table `ventes`
+-- Table structure for table `ventes`
 --
 
 CREATE TABLE `ventes` (
@@ -1650,7 +1656,7 @@ CREATE TABLE `ventes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `ventes`
+-- Dumping data for table `ventes`
 --
 
 INSERT INTO `ventes` (`id`, `numero`, `date_vente`, `client_id`, `canal_vente_id`, `devis_id`, `statut`, `montant_total_ht`, `montant_total_ttc`, `utilisateur_id`, `commentaires`) VALUES
@@ -1673,12 +1679,13 @@ INSERT INTO `ventes` (`id`, `numero`, `date_vente`, `client_id`, `canal_vente_id
 (17, 'V-20251121-112325', '2025-11-21', 6, 1, 5, 'LIVREE', 1315000.00, 1568137.50, 1, 'Vente issue du devis DV-20251121-112258'),
 (18, 'V-20251126-154658', '2025-11-26', 6, 1, NULL, 'EN_ATTENTE_LIVRAISON', 180000.00, 214650.00, 1, NULL),
 (19, 'V-20251126-154749', '2025-11-26', 6, 1, NULL, 'LIVREE', 360000.00, 429300.00, 1, NULL),
-(20, 'V-20251126-170324', '2025-11-26', 2, 4, NULL, 'LIVREE', 75000.00, 89437.50, 1, NULL);
+(20, 'V-20251126-170324', '2025-11-26', 2, 4, NULL, 'LIVREE', 75000.00, 89437.50, 1, NULL),
+(21, 'V-20251212-151125', '2025-12-12', 4, 1, NULL, 'EN_ATTENTE_LIVRAISON', 840000.00, 1001700.00, 1, NULL);
 
 -- --------------------------------------------------------
 
 --
--- Structure de la table `ventes_lignes`
+-- Table structure for table `ventes_lignes`
 --
 
 CREATE TABLE `ventes_lignes` (
@@ -1692,7 +1699,7 @@ CREATE TABLE `ventes_lignes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `ventes_lignes`
+-- Dumping data for table `ventes_lignes`
 --
 
 INSERT INTO `ventes_lignes` (`id`, `vente_id`, `produit_id`, `quantite`, `prix_unitaire`, `remise`, `montant_ligne_ht`) VALUES
@@ -1718,12 +1725,13 @@ INSERT INTO `ventes_lignes` (`id`, `vente_id`, `produit_id`, `quantite`, `prix_u
 (27, 17, 3, 5, 5000.00, 0.00, 25000.00),
 (28, 18, 1, 1, 180000.00, 0.00, 180000.00),
 (31, 19, 1, 2, 180000.00, 0.00, 360000.00),
-(34, 20, 3, 3, 25000.00, 0.00, 75000.00);
+(34, 20, 3, 3, 25000.00, 0.00, 75000.00),
+(35, 21, 2, 3, 280000.00, 0.00, 840000.00);
 
 -- --------------------------------------------------------
 
 --
--- Structure de la table `visiteurs_hotel`
+-- Table structure for table `visiteurs_hotel`
 --
 
 CREATE TABLE `visiteurs_hotel` (
@@ -1741,7 +1749,7 @@ CREATE TABLE `visiteurs_hotel` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `visiteurs_showroom`
+-- Table structure for table `visiteurs_showroom`
 --
 
 CREATE TABLE `visiteurs_showroom` (
@@ -1758,8 +1766,8 @@ CREATE TABLE `visiteurs_showroom` (
 -- --------------------------------------------------------
 
 --
--- Doublure de structure pour la vue `v_pipeline_commercial`
--- (Voir ci-dessous la vue réelle)
+-- Stand-in structure for view `v_pipeline_commercial`
+-- (See below for the actual view)
 --
 CREATE TABLE `v_pipeline_commercial` (
 `canal` varchar(8)
@@ -1774,8 +1782,8 @@ CREATE TABLE `v_pipeline_commercial` (
 -- --------------------------------------------------------
 
 --
--- Doublure de structure pour la vue `v_ventes_livraison_encaissement`
--- (Voir ci-dessous la vue réelle)
+-- Stand-in structure for view `v_ventes_livraison_encaissement`
+-- (See below for the actual view)
 --
 CREATE TABLE `v_ventes_livraison_encaissement` (
 `id` int(10) unsigned
@@ -1791,7 +1799,7 @@ CREATE TABLE `v_ventes_livraison_encaissement` (
 -- --------------------------------------------------------
 
 --
--- Structure de la vue `v_pipeline_commercial`
+-- Structure for view `v_pipeline_commercial`
 --
 DROP TABLE IF EXISTS `v_pipeline_commercial`;
 
@@ -1800,25 +1808,25 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 -- --------------------------------------------------------
 
 --
--- Structure de la vue `v_ventes_livraison_encaissement`
+-- Structure for view `v_ventes_livraison_encaissement`
 --
 DROP TABLE IF EXISTS `v_ventes_livraison_encaissement`;
 
 CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `v_ventes_livraison_encaissement`  AS SELECT `v`.`id` AS `id`, `v`.`numero` AS `numero`, `v`.`date_vente` AS `date_vente`, `v`.`montant_total_ttc` AS `montant_total_ttc`, `v`.`statut` AS `statut_vente`, CASE WHEN exists(select 1 from `bons_livraison` `bl` where `bl`.`vente_id` = `v`.`id` AND `bl`.`signe_client` = 1 limit 1) THEN 'LIVRE' ELSE 'NON_LIVRE' END AS `statut_livraison`, coalesce((select sum(`jc`.`montant`) from `journal_caisse` `jc` where `jc`.`vente_id` = `v`.`id`),0) AS `montant_encaisse`, `v`.`montant_total_ttc`- coalesce((select sum(`jc`.`montant`) from `journal_caisse` `jc` where `jc`.`vente_id` = `v`.`id`),0) AS `solde_du` FROM `ventes` AS `v` ;
 
 --
--- Index pour les tables déchargées
+-- Indexes for dumped tables
 --
 
 --
--- Index pour la table `achats`
+-- Indexes for table `achats`
 --
 ALTER TABLE `achats`
   ADD PRIMARY KEY (`id`),
   ADD KEY `fk_achats_utilisateur` (`utilisateur_id`);
 
 --
--- Index pour la table `achats_lignes`
+-- Indexes for table `achats_lignes`
 --
 ALTER TABLE `achats_lignes`
   ADD PRIMARY KEY (`id`),
@@ -1826,7 +1834,7 @@ ALTER TABLE `achats_lignes`
   ADD KEY `fk_achats_lignes_produit` (`produit_id`);
 
 --
--- Index pour la table `bons_livraison`
+-- Indexes for table `bons_livraison`
 --
 ALTER TABLE `bons_livraison`
   ADD PRIMARY KEY (`id`),
@@ -1837,7 +1845,7 @@ ALTER TABLE `bons_livraison`
   ADD KEY `idx_bl_date` (`date_bl`);
 
 --
--- Index pour la table `bons_livraison_lignes`
+-- Indexes for table `bons_livraison_lignes`
 --
 ALTER TABLE `bons_livraison_lignes`
   ADD PRIMARY KEY (`id`),
@@ -1845,27 +1853,27 @@ ALTER TABLE `bons_livraison_lignes`
   ADD KEY `fk_bl_lignes_produit` (`produit_id`);
 
 --
--- Index pour la table `caisse_journal`
+-- Indexes for table `caisse_journal`
 --
 ALTER TABLE `caisse_journal`
   ADD PRIMARY KEY (`id`);
 
 --
--- Index pour la table `canaux_vente`
+-- Indexes for table `canaux_vente`
 --
 ALTER TABLE `canaux_vente`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `code` (`code`);
 
 --
--- Index pour la table `chambres`
+-- Indexes for table `chambres`
 --
 ALTER TABLE `chambres`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `code` (`code`);
 
 --
--- Index pour la table `clients`
+-- Indexes for table `clients`
 --
 ALTER TABLE `clients`
   ADD PRIMARY KEY (`id`),
@@ -1873,7 +1881,7 @@ ALTER TABLE `clients`
   ADD KEY `idx_clients_nom` (`nom`);
 
 --
--- Index pour la table `compta_comptes`
+-- Indexes for table `compta_comptes`
 --
 ALTER TABLE `compta_comptes`
   ADD PRIMARY KEY (`id`),
@@ -1884,7 +1892,7 @@ ALTER TABLE `compta_comptes`
   ADD KEY `idx_nature` (`nature`);
 
 --
--- Index pour la table `compta_ecritures`
+-- Indexes for table `compta_ecritures`
 --
 ALTER TABLE `compta_ecritures`
   ADD PRIMARY KEY (`id`),
@@ -1895,14 +1903,14 @@ ALTER TABLE `compta_ecritures`
   ADD KEY `idx_debit_credit` (`debit`,`credit`);
 
 --
--- Index pour la table `compta_exercices`
+-- Indexes for table `compta_exercices`
 --
 ALTER TABLE `compta_exercices`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `annee` (`annee`);
 
 --
--- Index pour la table `compta_journaux`
+-- Indexes for table `compta_journaux`
 --
 ALTER TABLE `compta_journaux`
   ADD PRIMARY KEY (`id`),
@@ -1910,7 +1918,7 @@ ALTER TABLE `compta_journaux`
   ADD KEY `compte_contre_partie` (`compte_contre_partie`);
 
 --
--- Index pour la table `compta_mapping_operations`
+-- Indexes for table `compta_mapping_operations`
 --
 ALTER TABLE `compta_mapping_operations`
   ADD PRIMARY KEY (`id`),
@@ -1921,7 +1929,7 @@ ALTER TABLE `compta_mapping_operations`
   ADD KEY `idx_source` (`source_type`,`code_operation`);
 
 --
--- Index pour la table `compta_operations_trace`
+-- Indexes for table `compta_operations_trace`
 --
 ALTER TABLE `compta_operations_trace`
   ADD PRIMARY KEY (`id`),
@@ -1930,7 +1938,7 @@ ALTER TABLE `compta_operations_trace`
   ADD KEY `idx_status` (`status`);
 
 --
--- Index pour la table `compta_pieces`
+-- Indexes for table `compta_pieces`
 --
 ALTER TABLE `compta_pieces`
   ADD PRIMARY KEY (`id`),
@@ -1942,7 +1950,7 @@ ALTER TABLE `compta_pieces`
   ADD KEY `idx_ref` (`reference_type`,`reference_id`);
 
 --
--- Index pour la table `connexions_utilisateur`
+-- Indexes for table `connexions_utilisateur`
 --
 ALTER TABLE `connexions_utilisateur`
   ADD PRIMARY KEY (`id`),
@@ -1950,7 +1958,7 @@ ALTER TABLE `connexions_utilisateur`
   ADD KEY `idx_connexions_utilisateur_date` (`date_connexion`);
 
 --
--- Index pour la table `conversions_pipeline`
+-- Indexes for table `conversions_pipeline`
 --
 ALTER TABLE `conversions_pipeline`
   ADD PRIMARY KEY (`id`),
@@ -1962,7 +1970,7 @@ ALTER TABLE `conversions_pipeline`
   ADD KEY `fk_conversions_vente` (`vente_id`);
 
 --
--- Index pour la table `devis`
+-- Indexes for table `devis`
 --
 ALTER TABLE `devis`
   ADD PRIMARY KEY (`id`),
@@ -1974,7 +1982,7 @@ ALTER TABLE `devis`
   ADD KEY `idx_devis_statut` (`statut`);
 
 --
--- Index pour la table `devis_lignes`
+-- Indexes for table `devis_lignes`
 --
 ALTER TABLE `devis_lignes`
   ADD PRIMARY KEY (`id`),
@@ -1982,25 +1990,25 @@ ALTER TABLE `devis_lignes`
   ADD KEY `fk_devis_lignes_produit` (`produit_id`);
 
 --
--- Index pour la table `familles_produits`
+-- Indexes for table `familles_produits`
 --
 ALTER TABLE `familles_produits`
   ADD PRIMARY KEY (`id`);
 
 --
--- Index pour la table `formations`
+-- Indexes for table `formations`
 --
 ALTER TABLE `formations`
   ADD PRIMARY KEY (`id`);
 
 --
--- Index pour la table `fournisseurs`
+-- Indexes for table `fournisseurs`
 --
 ALTER TABLE `fournisseurs`
   ADD PRIMARY KEY (`id`);
 
 --
--- Index pour la table `inscriptions_formation`
+-- Indexes for table `inscriptions_formation`
 --
 ALTER TABLE `inscriptions_formation`
   ADD PRIMARY KEY (`id`),
@@ -2009,7 +2017,7 @@ ALTER TABLE `inscriptions_formation`
   ADD KEY `idx_inscription_date` (`date_inscription`);
 
 --
--- Index pour la table `journal_caisse`
+-- Indexes for table `journal_caisse`
 --
 ALTER TABLE `journal_caisse`
   ADD PRIMARY KEY (`id`),
@@ -2022,7 +2030,7 @@ ALTER TABLE `journal_caisse`
   ADD KEY `fk_journal_caisse_annule_par` (`annule_par_id`);
 
 --
--- Index pour la table `kpis_quotidiens`
+-- Indexes for table `kpis_quotidiens`
 --
 ALTER TABLE `kpis_quotidiens`
   ADD PRIMARY KEY (`id`),
@@ -2030,7 +2038,7 @@ ALTER TABLE `kpis_quotidiens`
   ADD KEY `idx_kpis_date` (`date`);
 
 --
--- Index pour la table `leads_digital`
+-- Indexes for table `leads_digital`
 --
 ALTER TABLE `leads_digital`
   ADD PRIMARY KEY (`id`),
@@ -2042,14 +2050,14 @@ ALTER TABLE `leads_digital`
   ADD KEY `fk_leads_utilisateur` (`utilisateur_responsable_id`);
 
 --
--- Index pour la table `modes_paiement`
+-- Indexes for table `modes_paiement`
 --
 ALTER TABLE `modes_paiement`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `code` (`code`);
 
 --
--- Index pour la table `mouvements_stock_backup_20251209_161710`
+-- Indexes for table `mouvements_stock_backup_20251209_161710`
 --
 ALTER TABLE `mouvements_stock_backup_20251209_161710`
   ADD PRIMARY KEY (`id`),
@@ -2057,7 +2065,7 @@ ALTER TABLE `mouvements_stock_backup_20251209_161710`
   ADD KEY `idx_mouvements_stock_utilisateur` (`utilisateur_id`);
 
 --
--- Index pour la table `objectifs_commerciaux`
+-- Indexes for table `objectifs_commerciaux`
 --
 ALTER TABLE `objectifs_commerciaux`
   ADD PRIMARY KEY (`id`),
@@ -2065,7 +2073,7 @@ ALTER TABLE `objectifs_commerciaux`
   ADD KEY `idx_objectifs_periode` (`annee`,`mois`);
 
 --
--- Index pour la table `ordres_preparation`
+-- Indexes for table `ordres_preparation`
 --
 ALTER TABLE `ordres_preparation`
   ADD PRIMARY KEY (`id`),
@@ -2079,7 +2087,7 @@ ALTER TABLE `ordres_preparation`
   ADD KEY `fk_ordres_magasinier` (`magasinier_id`);
 
 --
--- Index pour la table `ordres_preparation_lignes`
+-- Indexes for table `ordres_preparation_lignes`
 --
 ALTER TABLE `ordres_preparation_lignes`
   ADD PRIMARY KEY (`id`),
@@ -2087,14 +2095,14 @@ ALTER TABLE `ordres_preparation_lignes`
   ADD KEY `fk_ordres_lignes_produit` (`produit_id`);
 
 --
--- Index pour la table `permissions`
+-- Indexes for table `permissions`
 --
 ALTER TABLE `permissions`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `code` (`code`);
 
 --
--- Index pour la table `produits`
+-- Indexes for table `produits`
 --
 ALTER TABLE `produits`
   ADD PRIMARY KEY (`id`),
@@ -2106,20 +2114,20 @@ ALTER TABLE `produits`
   ADD KEY `idx_produits_code` (`code_produit`);
 
 --
--- Index pour la table `promotions`
+-- Indexes for table `promotions`
 --
 ALTER TABLE `promotions`
   ADD PRIMARY KEY (`id`);
 
 --
--- Index pour la table `promotion_produit`
+-- Indexes for table `promotion_produit`
 --
 ALTER TABLE `promotion_produit`
   ADD PRIMARY KEY (`promotion_id`,`produit_id`),
   ADD KEY `fk_promo_produit_produit` (`produit_id`);
 
 --
--- Index pour la table `prospections_terrain`
+-- Indexes for table `prospections_terrain`
 --
 ALTER TABLE `prospections_terrain`
   ADD PRIMARY KEY (`id`),
@@ -2128,7 +2136,7 @@ ALTER TABLE `prospections_terrain`
   ADD KEY `idx_prospections_date` (`date_prospection`);
 
 --
--- Index pour la table `prospects_formation`
+-- Indexes for table `prospects_formation`
 --
 ALTER TABLE `prospects_formation`
   ADD PRIMARY KEY (`id`),
@@ -2137,7 +2145,7 @@ ALTER TABLE `prospects_formation`
   ADD KEY `idx_prospect_formation_date` (`date_prospect`);
 
 --
--- Index pour la table `relances_devis`
+-- Indexes for table `relances_devis`
 --
 ALTER TABLE `relances_devis`
   ADD PRIMARY KEY (`id`),
@@ -2146,7 +2154,7 @@ ALTER TABLE `relances_devis`
   ADD KEY `fk_relances_utilisateur` (`utilisateur_id`);
 
 --
--- Index pour la table `rendezvous_terrain`
+-- Indexes for table `rendezvous_terrain`
 --
 ALTER TABLE `rendezvous_terrain`
   ADD PRIMARY KEY (`id`),
@@ -2155,7 +2163,7 @@ ALTER TABLE `rendezvous_terrain`
   ADD KEY `idx_rdv_date` (`date_rdv`);
 
 --
--- Index pour la table `reservations_hotel`
+-- Indexes for table `reservations_hotel`
 --
 ALTER TABLE `reservations_hotel`
   ADD PRIMARY KEY (`id`),
@@ -2166,7 +2174,7 @@ ALTER TABLE `reservations_hotel`
   ADD KEY `idx_reservation_dates` (`date_debut`,`date_fin`);
 
 --
--- Index pour la table `retours_litiges`
+-- Indexes for table `retours_litiges`
 --
 ALTER TABLE `retours_litiges`
   ADD PRIMARY KEY (`id`),
@@ -2176,21 +2184,21 @@ ALTER TABLE `retours_litiges`
   ADD KEY `fk_litiges_responsable` (`responsable_suivi_id`);
 
 --
--- Index pour la table `roles`
+-- Indexes for table `roles`
 --
 ALTER TABLE `roles`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `code` (`code`);
 
 --
--- Index pour la table `role_permission`
+-- Indexes for table `role_permission`
 --
 ALTER TABLE `role_permission`
   ADD PRIMARY KEY (`role_id`,`permission_id`),
   ADD KEY `fk_role_permission_permission` (`permission_id`);
 
 --
--- Index pour la table `ruptures_signalees`
+-- Indexes for table `ruptures_signalees`
 --
 ALTER TABLE `ruptures_signalees`
   ADD PRIMARY KEY (`id`),
@@ -2200,7 +2208,7 @@ ALTER TABLE `ruptures_signalees`
   ADD KEY `fk_ruptures_sig_magasinier` (`magasinier_id`);
 
 --
--- Index pour la table `ruptures_stock`
+-- Indexes for table `ruptures_stock`
 --
 ALTER TABLE `ruptures_stock`
   ADD PRIMARY KEY (`id`),
@@ -2209,7 +2217,7 @@ ALTER TABLE `ruptures_stock`
   ADD KEY `idx_ruptures_date` (`date_rapport`);
 
 --
--- Index pour la table `satisfaction_clients`
+-- Indexes for table `satisfaction_clients`
 --
 ALTER TABLE `satisfaction_clients`
   ADD PRIMARY KEY (`id`),
@@ -2218,14 +2226,14 @@ ALTER TABLE `satisfaction_clients`
   ADD KEY `idx_satisfaction_date` (`date_satisfaction`);
 
 --
--- Index pour la table `sous_categories_produits`
+-- Indexes for table `sous_categories_produits`
 --
 ALTER TABLE `sous_categories_produits`
   ADD PRIMARY KEY (`id`),
   ADD KEY `fk_sous_categories_famille` (`famille_id`);
 
 --
--- Index pour la table `stocks_mouvements`
+-- Indexes for table `stocks_mouvements`
 --
 ALTER TABLE `stocks_mouvements`
   ADD PRIMARY KEY (`id`),
@@ -2234,35 +2242,35 @@ ALTER TABLE `stocks_mouvements`
   ADD KEY `idx_mouvements_date` (`date_mouvement`);
 
 --
--- Index pour la table `types_client`
+-- Indexes for table `types_client`
 --
 ALTER TABLE `types_client`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `code` (`code`);
 
 --
--- Index pour la table `upsell_hotel`
+-- Indexes for table `upsell_hotel`
 --
 ALTER TABLE `upsell_hotel`
   ADD PRIMARY KEY (`id`),
   ADD KEY `fk_upsell_reservation` (`reservation_id`);
 
 --
--- Index pour la table `utilisateurs`
+-- Indexes for table `utilisateurs`
 --
 ALTER TABLE `utilisateurs`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `login` (`login`);
 
 --
--- Index pour la table `utilisateur_role`
+-- Indexes for table `utilisateur_role`
 --
 ALTER TABLE `utilisateur_role`
   ADD PRIMARY KEY (`utilisateur_id`,`role_id`),
   ADD KEY `fk_utilisateur_role_role` (`role_id`);
 
 --
--- Index pour la table `ventes`
+-- Indexes for table `ventes`
 --
 ALTER TABLE `ventes`
   ADD PRIMARY KEY (`id`),
@@ -2275,7 +2283,7 @@ ALTER TABLE `ventes`
   ADD KEY `idx_ventes_statut` (`statut`);
 
 --
--- Index pour la table `ventes_lignes`
+-- Indexes for table `ventes_lignes`
 --
 ALTER TABLE `ventes_lignes`
   ADD PRIMARY KEY (`id`),
@@ -2283,7 +2291,7 @@ ALTER TABLE `ventes_lignes`
   ADD KEY `fk_ventes_lignes_produit` (`produit_id`);
 
 --
--- Index pour la table `visiteurs_hotel`
+-- Indexes for table `visiteurs_hotel`
 --
 ALTER TABLE `visiteurs_hotel`
   ADD PRIMARY KEY (`id`),
@@ -2291,7 +2299,7 @@ ALTER TABLE `visiteurs_hotel`
   ADD KEY `idx_visiteurs_hotel_date` (`date_visite`);
 
 --
--- Index pour la table `visiteurs_showroom`
+-- Indexes for table `visiteurs_showroom`
 --
 ALTER TABLE `visiteurs_showroom`
   ADD PRIMARY KEY (`id`),
@@ -2300,346 +2308,346 @@ ALTER TABLE `visiteurs_showroom`
   ADD KEY `idx_visiteurs_date` (`date_visite`);
 
 --
--- AUTO_INCREMENT pour les tables déchargées
+-- AUTO_INCREMENT for dumped tables
 --
 
 --
--- AUTO_INCREMENT pour la table `achats`
+-- AUTO_INCREMENT for table `achats`
 --
 ALTER TABLE `achats`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT pour la table `achats_lignes`
+-- AUTO_INCREMENT for table `achats_lignes`
 --
 ALTER TABLE `achats_lignes`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
--- AUTO_INCREMENT pour la table `bons_livraison`
+-- AUTO_INCREMENT for table `bons_livraison`
 --
 ALTER TABLE `bons_livraison`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
--- AUTO_INCREMENT pour la table `bons_livraison_lignes`
+-- AUTO_INCREMENT for table `bons_livraison_lignes`
 --
 ALTER TABLE `bons_livraison_lignes`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
--- AUTO_INCREMENT pour la table `caisse_journal`
+-- AUTO_INCREMENT for table `caisse_journal`
 --
 ALTER TABLE `caisse_journal`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT pour la table `canaux_vente`
+-- AUTO_INCREMENT for table `canaux_vente`
 --
 ALTER TABLE `canaux_vente`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT pour la table `chambres`
+-- AUTO_INCREMENT for table `chambres`
 --
 ALTER TABLE `chambres`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT pour la table `clients`
+-- AUTO_INCREMENT for table `clients`
 --
 ALTER TABLE `clients`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
--- AUTO_INCREMENT pour la table `compta_comptes`
+-- AUTO_INCREMENT for table `compta_comptes`
 --
 ALTER TABLE `compta_comptes`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=112;
 
 --
--- AUTO_INCREMENT pour la table `compta_ecritures`
+-- AUTO_INCREMENT for table `compta_ecritures`
 --
 ALTER TABLE `compta_ecritures`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=57;
 
 --
--- AUTO_INCREMENT pour la table `compta_exercices`
+-- AUTO_INCREMENT for table `compta_exercices`
 --
 ALTER TABLE `compta_exercices`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT pour la table `compta_journaux`
+-- AUTO_INCREMENT for table `compta_journaux`
 --
 ALTER TABLE `compta_journaux`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT pour la table `compta_mapping_operations`
+-- AUTO_INCREMENT for table `compta_mapping_operations`
 --
 ALTER TABLE `compta_mapping_operations`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT pour la table `compta_operations_trace`
+-- AUTO_INCREMENT for table `compta_operations_trace`
 --
 ALTER TABLE `compta_operations_trace`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
--- AUTO_INCREMENT pour la table `compta_pieces`
+-- AUTO_INCREMENT for table `compta_pieces`
 --
 ALTER TABLE `compta_pieces`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
--- AUTO_INCREMENT pour la table `connexions_utilisateur`
+-- AUTO_INCREMENT for table `connexions_utilisateur`
 --
 ALTER TABLE `connexions_utilisateur`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
--- AUTO_INCREMENT pour la table `conversions_pipeline`
+-- AUTO_INCREMENT for table `conversions_pipeline`
 --
 ALTER TABLE `conversions_pipeline`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT pour la table `devis`
+-- AUTO_INCREMENT for table `devis`
 --
 ALTER TABLE `devis`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT pour la table `devis_lignes`
+-- AUTO_INCREMENT for table `devis_lignes`
 --
 ALTER TABLE `devis_lignes`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
--- AUTO_INCREMENT pour la table `familles_produits`
+-- AUTO_INCREMENT for table `familles_produits`
 --
 ALTER TABLE `familles_produits`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
--- AUTO_INCREMENT pour la table `formations`
+-- AUTO_INCREMENT for table `formations`
 --
 ALTER TABLE `formations`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT pour la table `fournisseurs`
+-- AUTO_INCREMENT for table `fournisseurs`
 --
 ALTER TABLE `fournisseurs`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT pour la table `inscriptions_formation`
+-- AUTO_INCREMENT for table `inscriptions_formation`
 --
 ALTER TABLE `inscriptions_formation`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT pour la table `journal_caisse`
+-- AUTO_INCREMENT for table `journal_caisse`
 --
 ALTER TABLE `journal_caisse`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
--- AUTO_INCREMENT pour la table `kpis_quotidiens`
+-- AUTO_INCREMENT for table `kpis_quotidiens`
 --
 ALTER TABLE `kpis_quotidiens`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT pour la table `leads_digital`
+-- AUTO_INCREMENT for table `leads_digital`
 --
 ALTER TABLE `leads_digital`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT pour la table `modes_paiement`
+-- AUTO_INCREMENT for table `modes_paiement`
 --
 ALTER TABLE `modes_paiement`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
--- AUTO_INCREMENT pour la table `mouvements_stock_backup_20251209_161710`
+-- AUTO_INCREMENT for table `mouvements_stock_backup_20251209_161710`
 --
 ALTER TABLE `mouvements_stock_backup_20251209_161710`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT pour la table `objectifs_commerciaux`
+-- AUTO_INCREMENT for table `objectifs_commerciaux`
 --
 ALTER TABLE `objectifs_commerciaux`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT pour la table `ordres_preparation`
+-- AUTO_INCREMENT for table `ordres_preparation`
 --
 ALTER TABLE `ordres_preparation`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT pour la table `ordres_preparation_lignes`
+-- AUTO_INCREMENT for table `ordres_preparation_lignes`
 --
 ALTER TABLE `ordres_preparation_lignes`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT pour la table `permissions`
+-- AUTO_INCREMENT for table `permissions`
 --
 ALTER TABLE `permissions`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
--- AUTO_INCREMENT pour la table `produits`
+-- AUTO_INCREMENT for table `produits`
 --
 ALTER TABLE `produits`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
--- AUTO_INCREMENT pour la table `promotions`
+-- AUTO_INCREMENT for table `promotions`
 --
 ALTER TABLE `promotions`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT pour la table `prospections_terrain`
+-- AUTO_INCREMENT for table `prospections_terrain`
 --
 ALTER TABLE `prospections_terrain`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT pour la table `prospects_formation`
+-- AUTO_INCREMENT for table `prospects_formation`
 --
 ALTER TABLE `prospects_formation`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT pour la table `relances_devis`
+-- AUTO_INCREMENT for table `relances_devis`
 --
 ALTER TABLE `relances_devis`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT pour la table `rendezvous_terrain`
+-- AUTO_INCREMENT for table `rendezvous_terrain`
 --
 ALTER TABLE `rendezvous_terrain`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT pour la table `reservations_hotel`
+-- AUTO_INCREMENT for table `reservations_hotel`
 --
 ALTER TABLE `reservations_hotel`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT pour la table `retours_litiges`
+-- AUTO_INCREMENT for table `retours_litiges`
 --
 ALTER TABLE `retours_litiges`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT pour la table `roles`
+-- AUTO_INCREMENT for table `roles`
 --
 ALTER TABLE `roles`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
--- AUTO_INCREMENT pour la table `ruptures_signalees`
+-- AUTO_INCREMENT for table `ruptures_signalees`
 --
 ALTER TABLE `ruptures_signalees`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT pour la table `ruptures_stock`
+-- AUTO_INCREMENT for table `ruptures_stock`
 --
 ALTER TABLE `ruptures_stock`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT pour la table `satisfaction_clients`
+-- AUTO_INCREMENT for table `satisfaction_clients`
 --
 ALTER TABLE `satisfaction_clients`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT pour la table `sous_categories_produits`
+-- AUTO_INCREMENT for table `sous_categories_produits`
 --
 ALTER TABLE `sous_categories_produits`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT pour la table `stocks_mouvements`
+-- AUTO_INCREMENT for table `stocks_mouvements`
 --
 ALTER TABLE `stocks_mouvements`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
--- AUTO_INCREMENT pour la table `types_client`
+-- AUTO_INCREMENT for table `types_client`
 --
 ALTER TABLE `types_client`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT pour la table `upsell_hotel`
+-- AUTO_INCREMENT for table `upsell_hotel`
 --
 ALTER TABLE `upsell_hotel`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT pour la table `utilisateurs`
+-- AUTO_INCREMENT for table `utilisateurs`
 --
 ALTER TABLE `utilisateurs`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
--- AUTO_INCREMENT pour la table `ventes`
+-- AUTO_INCREMENT for table `ventes`
 --
 ALTER TABLE `ventes`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
--- AUTO_INCREMENT pour la table `ventes_lignes`
+-- AUTO_INCREMENT for table `ventes_lignes`
 --
 ALTER TABLE `ventes_lignes`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
--- AUTO_INCREMENT pour la table `visiteurs_hotel`
+-- AUTO_INCREMENT for table `visiteurs_hotel`
 --
 ALTER TABLE `visiteurs_hotel`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT pour la table `visiteurs_showroom`
+-- AUTO_INCREMENT for table `visiteurs_showroom`
 --
 ALTER TABLE `visiteurs_showroom`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- Contraintes pour les tables déchargées
+-- Constraints for dumped tables
 --
 
 --
--- Contraintes pour la table `achats`
+-- Constraints for table `achats`
 --
 ALTER TABLE `achats`
   ADD CONSTRAINT `fk_achats_utilisateur` FOREIGN KEY (`utilisateur_id`) REFERENCES `utilisateurs` (`id`) ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `achats_lignes`
+-- Constraints for table `achats_lignes`
 --
 ALTER TABLE `achats_lignes`
   ADD CONSTRAINT `fk_achats_lignes_achat` FOREIGN KEY (`achat_id`) REFERENCES `achats` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_achats_lignes_produit` FOREIGN KEY (`produit_id`) REFERENCES `produits` (`id`) ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `bons_livraison`
+-- Constraints for table `bons_livraison`
 --
 ALTER TABLE `bons_livraison`
   ADD CONSTRAINT `fk_bl_client` FOREIGN KEY (`client_id`) REFERENCES `clients` (`id`) ON UPDATE CASCADE,
@@ -2647,26 +2655,26 @@ ALTER TABLE `bons_livraison`
   ADD CONSTRAINT `fk_bl_vente` FOREIGN KEY (`vente_id`) REFERENCES `ventes` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `bons_livraison_lignes`
+-- Constraints for table `bons_livraison_lignes`
 --
 ALTER TABLE `bons_livraison_lignes`
   ADD CONSTRAINT `fk_bl_lignes_bl` FOREIGN KEY (`bon_livraison_id`) REFERENCES `bons_livraison` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_bl_lignes_produit` FOREIGN KEY (`produit_id`) REFERENCES `produits` (`id`) ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `clients`
+-- Constraints for table `clients`
 --
 ALTER TABLE `clients`
   ADD CONSTRAINT `fk_clients_type` FOREIGN KEY (`type_client_id`) REFERENCES `types_client` (`id`) ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `compta_comptes`
+-- Constraints for table `compta_comptes`
 --
 ALTER TABLE `compta_comptes`
   ADD CONSTRAINT `compta_comptes_ibfk_1` FOREIGN KEY (`compte_parent_id`) REFERENCES `compta_comptes` (`id`);
 
 --
--- Contraintes pour la table `compta_ecritures`
+-- Constraints for table `compta_ecritures`
 --
 ALTER TABLE `compta_ecritures`
   ADD CONSTRAINT `compta_ecritures_ibfk_1` FOREIGN KEY (`piece_id`) REFERENCES `compta_pieces` (`id`) ON DELETE CASCADE,
@@ -2675,13 +2683,13 @@ ALTER TABLE `compta_ecritures`
   ADD CONSTRAINT `compta_ecritures_ibfk_4` FOREIGN KEY (`tiers_fournisseur_id`) REFERENCES `fournisseurs` (`id`);
 
 --
--- Contraintes pour la table `compta_journaux`
+-- Constraints for table `compta_journaux`
 --
 ALTER TABLE `compta_journaux`
   ADD CONSTRAINT `compta_journaux_ibfk_1` FOREIGN KEY (`compte_contre_partie`) REFERENCES `compta_comptes` (`id`);
 
 --
--- Contraintes pour la table `compta_mapping_operations`
+-- Constraints for table `compta_mapping_operations`
 --
 ALTER TABLE `compta_mapping_operations`
   ADD CONSTRAINT `compta_mapping_operations_ibfk_1` FOREIGN KEY (`journal_id`) REFERENCES `compta_journaux` (`id`),
@@ -2689,13 +2697,13 @@ ALTER TABLE `compta_mapping_operations`
   ADD CONSTRAINT `compta_mapping_operations_ibfk_3` FOREIGN KEY (`compte_credit_id`) REFERENCES `compta_comptes` (`id`);
 
 --
--- Contraintes pour la table `compta_operations_trace`
+-- Constraints for table `compta_operations_trace`
 --
 ALTER TABLE `compta_operations_trace`
   ADD CONSTRAINT `compta_operations_trace_ibfk_1` FOREIGN KEY (`piece_id`) REFERENCES `compta_pieces` (`id`);
 
 --
--- Contraintes pour la table `compta_pieces`
+-- Constraints for table `compta_pieces`
 --
 ALTER TABLE `compta_pieces`
   ADD CONSTRAINT `compta_pieces_ibfk_1` FOREIGN KEY (`exercice_id`) REFERENCES `compta_exercices` (`id`),
@@ -2704,13 +2712,13 @@ ALTER TABLE `compta_pieces`
   ADD CONSTRAINT `compta_pieces_ibfk_4` FOREIGN KEY (`tiers_fournisseur_id`) REFERENCES `fournisseurs` (`id`);
 
 --
--- Contraintes pour la table `connexions_utilisateur`
+-- Constraints for table `connexions_utilisateur`
 --
 ALTER TABLE `connexions_utilisateur`
   ADD CONSTRAINT `fk_connexions_utilisateur_utilisateur` FOREIGN KEY (`utilisateur_id`) REFERENCES `utilisateurs` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `conversions_pipeline`
+-- Constraints for table `conversions_pipeline`
 --
 ALTER TABLE `conversions_pipeline`
   ADD CONSTRAINT `fk_conversions_canal` FOREIGN KEY (`canal_vente_id`) REFERENCES `canaux_vente` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
@@ -2719,7 +2727,7 @@ ALTER TABLE `conversions_pipeline`
   ADD CONSTRAINT `fk_conversions_vente` FOREIGN KEY (`vente_id`) REFERENCES `ventes` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `devis`
+-- Constraints for table `devis`
 --
 ALTER TABLE `devis`
   ADD CONSTRAINT `fk_devis_canal` FOREIGN KEY (`canal_vente_id`) REFERENCES `canaux_vente` (`id`) ON UPDATE CASCADE,
@@ -2727,21 +2735,21 @@ ALTER TABLE `devis`
   ADD CONSTRAINT `fk_devis_utilisateur` FOREIGN KEY (`utilisateur_id`) REFERENCES `utilisateurs` (`id`) ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `devis_lignes`
+-- Constraints for table `devis_lignes`
 --
 ALTER TABLE `devis_lignes`
   ADD CONSTRAINT `fk_devis_lignes_devis` FOREIGN KEY (`devis_id`) REFERENCES `devis` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_devis_lignes_produit` FOREIGN KEY (`produit_id`) REFERENCES `produits` (`id`) ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `inscriptions_formation`
+-- Constraints for table `inscriptions_formation`
 --
 ALTER TABLE `inscriptions_formation`
   ADD CONSTRAINT `fk_inscription_client` FOREIGN KEY (`client_id`) REFERENCES `clients` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_inscription_formation` FOREIGN KEY (`formation_id`) REFERENCES `formations` (`id`) ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `journal_caisse`
+-- Constraints for table `journal_caisse`
 --
 ALTER TABLE `journal_caisse`
   ADD CONSTRAINT `fk_caisse_inscription` FOREIGN KEY (`inscription_formation_id`) REFERENCES `inscriptions_formation` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
@@ -2752,21 +2760,21 @@ ALTER TABLE `journal_caisse`
   ADD CONSTRAINT `fk_journal_caisse_annule_par` FOREIGN KEY (`annule_par_id`) REFERENCES `utilisateurs` (`id`) ON DELETE SET NULL;
 
 --
--- Contraintes pour la table `leads_digital`
+-- Constraints for table `leads_digital`
 --
 ALTER TABLE `leads_digital`
   ADD CONSTRAINT `fk_leads_client` FOREIGN KEY (`client_id`) REFERENCES `clients` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_leads_utilisateur` FOREIGN KEY (`utilisateur_responsable_id`) REFERENCES `utilisateurs` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `mouvements_stock_backup_20251209_161710`
+-- Constraints for table `mouvements_stock_backup_20251209_161710`
 --
 ALTER TABLE `mouvements_stock_backup_20251209_161710`
   ADD CONSTRAINT `fk_mouvements_stock_produit` FOREIGN KEY (`produit_id`) REFERENCES `produits` (`id`) ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_mouvements_stock_utilisateur` FOREIGN KEY (`utilisateur_id`) REFERENCES `utilisateurs` (`id`) ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `ordres_preparation`
+-- Constraints for table `ordres_preparation`
 --
 ALTER TABLE `ordres_preparation`
   ADD CONSTRAINT `fk_ordres_client` FOREIGN KEY (`client_id`) REFERENCES `clients` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -2776,14 +2784,14 @@ ALTER TABLE `ordres_preparation`
   ADD CONSTRAINT `fk_ordres_vente` FOREIGN KEY (`vente_id`) REFERENCES `ventes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `ordres_preparation_lignes`
+-- Constraints for table `ordres_preparation_lignes`
 --
 ALTER TABLE `ordres_preparation_lignes`
   ADD CONSTRAINT `fk_ordres_lignes_ordre` FOREIGN KEY (`ordre_preparation_id`) REFERENCES `ordres_preparation` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_ordres_lignes_produit` FOREIGN KEY (`produit_id`) REFERENCES `produits` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `produits`
+-- Constraints for table `produits`
 --
 ALTER TABLE `produits`
   ADD CONSTRAINT `fk_produits_famille` FOREIGN KEY (`famille_id`) REFERENCES `familles_produits` (`id`) ON UPDATE CASCADE,
@@ -2791,42 +2799,42 @@ ALTER TABLE `produits`
   ADD CONSTRAINT `fk_produits_sous_categorie` FOREIGN KEY (`sous_categorie_id`) REFERENCES `sous_categories_produits` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `promotion_produit`
+-- Constraints for table `promotion_produit`
 --
 ALTER TABLE `promotion_produit`
   ADD CONSTRAINT `fk_promo_produit_produit` FOREIGN KEY (`produit_id`) REFERENCES `produits` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_promo_produit_promo` FOREIGN KEY (`promotion_id`) REFERENCES `promotions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `prospections_terrain`
+-- Constraints for table `prospections_terrain`
 --
 ALTER TABLE `prospections_terrain`
   ADD CONSTRAINT `fk_prospections_client` FOREIGN KEY (`client_id`) REFERENCES `clients` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_prospections_commercial` FOREIGN KEY (`commercial_id`) REFERENCES `utilisateurs` (`id`) ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `prospects_formation`
+-- Constraints for table `prospects_formation`
 --
 ALTER TABLE `prospects_formation`
   ADD CONSTRAINT `fk_prospect_formation_client` FOREIGN KEY (`client_id`) REFERENCES `clients` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_prospect_formation_utilisateur` FOREIGN KEY (`utilisateur_id`) REFERENCES `utilisateurs` (`id`) ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `relances_devis`
+-- Constraints for table `relances_devis`
 --
 ALTER TABLE `relances_devis`
   ADD CONSTRAINT `fk_relances_devis` FOREIGN KEY (`devis_id`) REFERENCES `devis` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_relances_utilisateur` FOREIGN KEY (`utilisateur_id`) REFERENCES `utilisateurs` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `rendezvous_terrain`
+-- Constraints for table `rendezvous_terrain`
 --
 ALTER TABLE `rendezvous_terrain`
   ADD CONSTRAINT `fk_rdv_client` FOREIGN KEY (`client_id`) REFERENCES `clients` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_rdv_commercial` FOREIGN KEY (`commercial_id`) REFERENCES `utilisateurs` (`id`) ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `reservations_hotel`
+-- Constraints for table `reservations_hotel`
 --
 ALTER TABLE `reservations_hotel`
   ADD CONSTRAINT `fk_reservation_chambre` FOREIGN KEY (`chambre_id`) REFERENCES `chambres` (`id`) ON UPDATE CASCADE,
@@ -2835,7 +2843,7 @@ ALTER TABLE `reservations_hotel`
   ADD CONSTRAINT `fk_reservation_mode_paiement` FOREIGN KEY (`mode_paiement_id`) REFERENCES `modes_paiement` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `retours_litiges`
+-- Constraints for table `retours_litiges`
 --
 ALTER TABLE `retours_litiges`
   ADD CONSTRAINT `fk_litiges_client` FOREIGN KEY (`client_id`) REFERENCES `clients` (`id`) ON UPDATE CASCADE,
@@ -2844,61 +2852,61 @@ ALTER TABLE `retours_litiges`
   ADD CONSTRAINT `fk_litiges_vente` FOREIGN KEY (`vente_id`) REFERENCES `ventes` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `role_permission`
+-- Constraints for table `role_permission`
 --
 ALTER TABLE `role_permission`
   ADD CONSTRAINT `fk_role_permission_permission` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_role_permission_role` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `ruptures_signalees`
+-- Constraints for table `ruptures_signalees`
 --
 ALTER TABLE `ruptures_signalees`
   ADD CONSTRAINT `fk_ruptures_sig_magasinier` FOREIGN KEY (`magasinier_id`) REFERENCES `utilisateurs` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_ruptures_sig_produit` FOREIGN KEY (`produit_id`) REFERENCES `produits` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `ruptures_stock`
+-- Constraints for table `ruptures_stock`
 --
 ALTER TABLE `ruptures_stock`
   ADD CONSTRAINT `fk_ruptures_magasinier` FOREIGN KEY (`magasinier_id`) REFERENCES `utilisateurs` (`id`) ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_ruptures_produit` FOREIGN KEY (`produit_id`) REFERENCES `produits` (`id`) ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `satisfaction_clients`
+-- Constraints for table `satisfaction_clients`
 --
 ALTER TABLE `satisfaction_clients`
   ADD CONSTRAINT `fk_satisfaction_client` FOREIGN KEY (`client_id`) REFERENCES `clients` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_satisfaction_utilisateur` FOREIGN KEY (`utilisateur_id`) REFERENCES `utilisateurs` (`id`) ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `sous_categories_produits`
+-- Constraints for table `sous_categories_produits`
 --
 ALTER TABLE `sous_categories_produits`
   ADD CONSTRAINT `fk_sous_categories_famille` FOREIGN KEY (`famille_id`) REFERENCES `familles_produits` (`id`) ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `stocks_mouvements`
+-- Constraints for table `stocks_mouvements`
 --
 ALTER TABLE `stocks_mouvements`
   ADD CONSTRAINT `fk_mouvements_produit` FOREIGN KEY (`produit_id`) REFERENCES `produits` (`id`) ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_mouvements_utilisateur` FOREIGN KEY (`utilisateur_id`) REFERENCES `utilisateurs` (`id`) ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `upsell_hotel`
+-- Constraints for table `upsell_hotel`
 --
 ALTER TABLE `upsell_hotel`
   ADD CONSTRAINT `fk_upsell_reservation` FOREIGN KEY (`reservation_id`) REFERENCES `reservations_hotel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `utilisateur_role`
+-- Constraints for table `utilisateur_role`
 --
 ALTER TABLE `utilisateur_role`
   ADD CONSTRAINT `fk_utilisateur_role_role` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_utilisateur_role_utilisateur` FOREIGN KEY (`utilisateur_id`) REFERENCES `utilisateurs` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `ventes`
+-- Constraints for table `ventes`
 --
 ALTER TABLE `ventes`
   ADD CONSTRAINT `fk_ventes_canal` FOREIGN KEY (`canal_vente_id`) REFERENCES `canaux_vente` (`id`) ON UPDATE CASCADE,
@@ -2907,20 +2915,20 @@ ALTER TABLE `ventes`
   ADD CONSTRAINT `fk_ventes_utilisateur` FOREIGN KEY (`utilisateur_id`) REFERENCES `utilisateurs` (`id`) ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `ventes_lignes`
+-- Constraints for table `ventes_lignes`
 --
 ALTER TABLE `ventes_lignes`
   ADD CONSTRAINT `fk_ventes_lignes_produit` FOREIGN KEY (`produit_id`) REFERENCES `produits` (`id`) ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_ventes_lignes_vente` FOREIGN KEY (`vente_id`) REFERENCES `ventes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `visiteurs_hotel`
+-- Constraints for table `visiteurs_hotel`
 --
 ALTER TABLE `visiteurs_hotel`
   ADD CONSTRAINT `fk_visiteurs_hotel_concierge` FOREIGN KEY (`concierge_id`) REFERENCES `utilisateurs` (`id`) ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `visiteurs_showroom`
+-- Constraints for table `visiteurs_showroom`
 --
 ALTER TABLE `visiteurs_showroom`
   ADD CONSTRAINT `fk_visiteurs_client` FOREIGN KEY (`client_id`) REFERENCES `clients` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
