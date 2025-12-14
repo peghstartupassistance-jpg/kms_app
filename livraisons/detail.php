@@ -41,7 +41,7 @@ if (!$bl) {
 
 // Charger les lignes
 $stmt = $pdo->prepare("
-    SELECT bll.*, p.code_produit, p.stock_actuel
+    SELECT bll.*, p.code_produit, p.stock_actuel, p.designation, p.prix_vente as prix_unitaire
     FROM bons_livraison_lignes bll
     LEFT JOIN produits p ON p.id = bll.produit_id
     WHERE bll.bon_livraison_id = ?
@@ -49,16 +49,18 @@ $stmt = $pdo->prepare("
 $stmt->execute([$id]);
 $lignes = $stmt->fetchAll();
 
-// Charger les mouvements de stock associés
+// Charger les mouvements de stock associés (via la vente liée au BL)
 $stmt = $pdo->prepare("
     SELECT sm.*, p.designation as produit_nom, p.code_produit, u.nom_complet as utilisateur_nom
     FROM stocks_mouvements sm
     LEFT JOIN produits p ON p.id = sm.produit_id
     LEFT JOIN utilisateurs u ON u.id = sm.utilisateur_id
-    WHERE sm.bon_livraison_id = ?
+    WHERE sm.source_type = 'VENTE' 
+      AND sm.source_id = ?
+      AND sm.commentaire LIKE CONCAT('%BL-', ?)
     ORDER BY sm.date_mouvement DESC
 ");
-$stmt->execute([$id]);
+$stmt->execute([$bl['vente_id'], $bl['numero']]);
 $mouvements_stock = $stmt->fetchAll();
 
 include __DIR__ . '/../partials/header.php';
@@ -91,6 +93,11 @@ include __DIR__ . '/../partials/sidebar.php';
             </div>
         </div>
         <div class="d-flex gap-2">
+            <?php if ($bl['statut'] !== 'ANNULE' && !$bl['signe_client']): ?>
+                <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalSignatureBL" title="Obtenir la signature du client">
+                    <i class="bi bi-pen-fill"></i> Obtenir signature
+                </button>
+            <?php endif; ?>
             <a href="<?= url_for('livraisons/print.php?id=' . $id) ?>" class="btn btn-primary btn-sm" target="_blank">
                 <i class="bi bi-printer"></i> Imprimer
             </a>
@@ -273,6 +280,32 @@ include __DIR__ . '/../partials/sidebar.php';
             </div>
         </div>
     <?php endif; ?>
+
 </div>
+
+<!-- Section Signature Client -->
+<?php if ($bl['signe_client']): ?>
+    <div class="container-fluid p-4">
+        <div class="card mt-4 border-success">
+            <div class="card-header bg-success text-white">
+                <i class="bi bi-check-circle-fill"></i> Statut Signature Client
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <span class="badge bg-success me-2"><i class="bi bi-check-circle-fill"></i> Document signé par le client</span>
+                        <p class="text-muted small mt-2">Cette livraison a été acceptée et signée par le client.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
+
+<!-- Modal Signature -->
+<?php include __DIR__ . '/modal_signature.php'; ?>
+
+<!-- Script Signature Handler -->
+<script src="<?= url_for('assets/js/signature-handler.js') ?>"></script>
 
 <?php include __DIR__ . '/../partials/footer.php'; ?>

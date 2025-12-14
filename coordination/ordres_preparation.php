@@ -61,6 +61,7 @@ $stats = $stmtStats->fetch();
 
 include __DIR__ . '/../partials/header.php';
 include __DIR__ . '/../partials/sidebar.php';
+include __DIR__ . '/navigation.php';  // Navigation coordination
 ?>
 
 <div class="container-fluid">

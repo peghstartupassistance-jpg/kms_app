@@ -313,6 +313,9 @@ include __DIR__ . '/../partials/sidebar.php';
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1 class="h4 mb-0">Journal de caisse</h1>
         <div class="d-flex gap-2">
+            <a href="<?= url_for('caisse/reconciliation.php') ?>" class="btn btn-primary btn-sm">
+                <i class="bi bi-clipboard-check me-1"></i> Réconciliation
+            </a>
             <a href="<?= url_for('caisse/export_excel.php?date_debut=' . urlencode($dateDebut) . '&date_fin=' . urlencode($dateFin)) ?>" 
                class="btn btn-success btn-sm">
                 <i class="bi bi-file-earmark-excel me-1"></i> Exporter Excel

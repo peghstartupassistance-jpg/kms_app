@@ -304,7 +304,7 @@ include __DIR__ . '/../partials/sidebar.php';
         <h1 class="h4 mb-0">
             <?= $modeEdition ? 'Modifier un devis' : 'Nouveau devis' ?>
         </h1>
-        <a href="<?= $devisListUrl ?>" class="btn btn-outline-secondary">
+        <a href="<?= $devisListUrl ?>" class="btn btn-outline-secondary btn-sm">
             <i class="bi bi-arrow-left me-1"></i> Retour à la liste
         </a>
     </div>

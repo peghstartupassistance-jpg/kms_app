@@ -12,6 +12,7 @@ $dateFin  = $_GET['date_fin'] ?? null;
 $statut   = $_GET['statut'] ?? '';
 $clientId = isset($_GET['client_id']) ? (int)$_GET['client_id'] : 0;
 $canalId  = isset($_GET['canal_id']) ? (int)$_GET['canal_id'] : 0;
+$encaissement = $_GET['encaissement'] ?? '';
 
 // Clients pour filtre
 $stmt = $pdo->query("SELECT id, nom FROM clients ORDER BY nom");
@@ -44,6 +45,10 @@ if ($clientId > 0) {
 if ($canalId > 0) {
     $where[] = "v.canal_vente_id = ?";
     $params[] = $canalId;
+}
+if ($encaissement !== '' && in_array($encaissement, ['ATTENTE_PAIEMENT','PARTIEL','ENCAISSE'], true)) {
+    $where[] = "v.statut_encaissement = ?";
+    $params[] = $encaissement;
 }
 
 $whereSql = '';
@@ -156,6 +161,21 @@ include __DIR__ . '/../partials/sidebar.php';
                         <?php endforeach; ?>
                     </select>
                 </div>
+                <div class="col-md-2">
+                    <label class="form-label small">Encaissement</label>
+                    <select name="encaissement" class="form-select">
+                        <option value="">Tous</option>
+                        <option value="ATTENTE_PAIEMENT" <?= $encaissement === 'ATTENTE_PAIEMENT' ? 'selected' : '' ?>>
+                            En attente
+                        </option>
+                        <option value="PARTIEL" <?= $encaissement === 'PARTIEL' ? 'selected' : '' ?>>
+                            Partiel
+                        </option>
+                        <option value="ENCAISSE" <?= $encaissement === 'ENCAISSE' ? 'selected' : '' ?>>
+                            Encaissée
+                        </option>
+                    </select>
+                </div>
 
                 <div class="col-12 d-flex gap-2">
                     <button type="submit" class="btn btn-primary btn-filter">
@@ -191,6 +211,7 @@ include __DIR__ . '/../partials/sidebar.php';
                             <th class="text-end">Montant HT</th>
                             <th class="text-end">Montant TTC</th>
                             <th class="text-center">Statut</th>
+                            <th class="text-center">Encaissement</th>
                             <th class="text-end">Actions</th>
                         </tr>
                         </thead>
@@ -249,6 +270,27 @@ include __DIR__ . '/../partials/sidebar.php';
                                     <span class="modern-badge <?= $badgeClass ?>">
                                         <i class="<?= $badgeIcon ?>"></i>
                                         <?= htmlspecialchars($v['statut']) ?>
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <?php
+                                    $encaissementBadge = 'badge-status-warning';
+                                    $encaissementIcon = 'bi-hourglass-split';
+                                    $encaissementText = 'En attente';
+                                    
+                                    if ($v['statut_encaissement'] === 'ENCAISSE') {
+                                        $encaissementBadge = 'badge-status-success';
+                                        $encaissementIcon = 'bi-check-circle-fill';
+                                        $encaissementText = 'Encaissée';
+                                    } elseif ($v['statut_encaissement'] === 'PARTIEL') {
+                                        $encaissementBadge = 'badge-status-info';
+                                        $encaissementIcon = 'bi-exclamation-triangle-fill';
+                                        $encaissementText = 'Partiel';
+                                    }
+                                    ?>
+                                    <span class="modern-badge <?= $encaissementBadge ?>" title="Statut encaissement">
+                                        <i class="<?= $encaissementIcon ?>"></i>
+                                        <?= $encaissementText ?>
                                     </span>
                                 </td>
                                 <td class="text-end">

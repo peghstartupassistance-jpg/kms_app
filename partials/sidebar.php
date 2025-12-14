@@ -180,6 +180,10 @@ function is_active($page, $dir = null): bool {
                         <i class="bi bi-cash-coin"></i>
                         <span>Caisse</span>
                     </a>
+                    <a href="<?= url_for('caisse/reconciliation.php') ?>" class="sidebar-item sidebar-item-nested <?= is_active('reconciliation.php', 'caisse') ? 'active' : '' ?>">
+                        <i class="bi bi-clipboard-check"></i>
+                        <span>Réconciliation</span>
+                    </a>
                 <?php endif; ?>
                 <?php if (peut('COMPTABILITE_LIRE')): ?>
                     <a href="<?= url_for('compta/index.php') ?>" class="sidebar-item <?= is_active('index.php', 'compta') ? 'active' : '' ?>">

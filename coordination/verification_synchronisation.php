@@ -102,9 +102,8 @@ foreach ($ventes as $vente) {
     // Montant encaissements (unified to journal_caisse)
     $stmt = $pdo->prepare("SELECT SUM(montant) as total 
                            FROM journal_caisse 
-                           WHERE (vente_id = ? AND sens = 'RECETTE' AND est_annule = 0) 
-                              OR (source_type = 'VENTE' AND source_id = ?)");
-    $stmt->execute([$vente['id'], $vente['id']]);
+                           WHERE vente_id = ? AND sens = 'RECETTE' AND est_annule = 0");
+    $stmt->execute([$vente['id']]);
     $enc = $stmt->fetch();
     $verif->montantEncaissements = $enc['total'] ?? 0;
     

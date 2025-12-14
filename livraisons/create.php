@@ -151,17 +151,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Insérer ligne BL
             $stmt = $pdo->prepare("
                 INSERT INTO bons_livraison_lignes 
-                (bon_livraison_id, produit_id, designation, quantite, quantite_commandee, quantite_restante, prix_unitaire)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                (bon_livraison_id, produit_id, quantite, quantite_commandee, quantite_restante)
+                VALUES (?, ?, ?, ?, ?)
             ");
             $stmt->execute([
                 $bl_id,
                 $produit_id,
-                $ligneVente['designation'],
                 $qte_livree,
                 $ligneVente['quantite'],
-                $ligneVente['qte_restante'] - $qte_livree,
-                $ligneVente['prix_unitaire']
+                $ligneVente['qte_restante'] - $qte_livree
             ]);
             
             $total_lignes++;
@@ -173,16 +171,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // Déstockage (sortie magasin)
             require_once __DIR__ . '/../lib/stock.php';
-            ajouterMouvement(
-                $pdo,
-                $produit_id,
-                'SORTIE_VENTE',
-                -$qte_livree,
-                "Livraison $numero_bl (Vente " . $vente['numero'] . ")",
-                $utilisateur['id'],
-                null,
-                $bl_id
-            );
+            stock_enregistrer_mouvement($pdo, [
+                'produit_id'     => $produit_id,
+                'type_mouvement' => 'SORTIE_VENTE',
+                'quantite'       => -$qte_livree,
+                'source_type'    => 'BL',
+                'source_id'      => $bl_id,
+                'commentaire'    => "Livraison $numero_bl (Vente " . $vente['numero'] . ")",
+                'utilisateur_id' => $utilisateur['id'],
+                'date_mouvement' => $date_livraison
+            ]);
         }
         
         if ($total_lignes === 0) {

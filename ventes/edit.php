@@ -271,22 +271,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // 🔗 Synchronisation stock (sorties liées à cette vente)
                     stock_synchroniser_vente($pdo, $venteId);
 
-                    // Enregistrer écriture en caisse (entrée de trésorerie pour vente) - créé uniquement à la création
-                    try {
-                        caisse_enregistrer_ecriture(
-                            $pdo,
-                            'ENTREE',
-                            (float)$totalTTC,
-                            'VENTE',
-                            $venteId,
-                            'Vente ' . ($numero ?? ''),
-                            $utilisateurId ?? null,
-                            $data['date_vente'] ?? null,
-                            $numero
-                        );
-                    } catch (Throwable $e) {
-                        // Ne pas empêcher l'enregistrement de la vente si l'écriture caisse échoue.
-                    }
+                    // Encaissement géré via le modal dédié (api_encaisser.php) pour éviter les doubles écritures.
 
                     // Génération automatique des écritures comptables si statut LIVREE
                     if ($data['statut'] === 'LIVREE') {
@@ -338,9 +323,31 @@ include __DIR__ . '/../partials/sidebar.php';
                    title="Voir dans coordination">
                     <i class="bi bi-diagram-3"></i> Coordination
                 </a>
+                
+                <!-- Bouton Encaisser si vente > 0 et pas déjà encaissée -->
+                <?php
+                $statut_encaissement = $vente['statut_encaissement'] ?? 'ATTENTE_PAIEMENT';
+                $montant_total = (float)($vente['montant_total_ttc'] ?? 0);
+                if ($montant_total > 0 && $statut_encaissement === 'ATTENTE_PAIEMENT'):
+                ?>
+                    <button type="button" 
+                            class="btn btn-sm btn-warning"
+                            data-bs-toggle="modal" 
+                            data-bs-target="#modalEncaissement"
+                            data-vente-id="<?= $id ?>"
+                            data-montant="<?= $montant_total ?>"
+                            title="Enregistrer le paiement">
+                        <i class="bi bi-cash-coin"></i> Encaisser
+                    </button>
+                <?php elseif ($statut_encaissement === 'ENCAISSE'): ?>
+                    <span class="badge bg-success">✓ Encaissée</span>
+                <?php endif; ?>
             <?php endif; ?>
             <a href="<?= url_for('ventes/list.php') ?>" class="btn btn-outline-secondary btn-sm">
                 <i class="bi bi-arrow-left me-1"></i> Retour à la liste
+            </a>
+            <a href="<?= url_for('caisse/reconciliation_jour.php?date=' . ($data['date_vente'] ?? date('Y-m-d'))) ?>" class="btn btn-outline-primary btn-sm" title="Réconciliation caisse">
+                <i class="bi bi-clipboard2-check"></i> Réconciliation jour
             </a>
         </div>
     </div>
@@ -705,5 +712,135 @@ function initProductSearch(input) {
     border-bottom: none;
 }
 </style>
+
+<!-- Modal Encaissement -->
+<div class="modal fade" id="modalEncaissement" tabindex="-1" aria-labelledby="modalEncaissementLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header bg-warning bg-opacity-10">
+                <h5 class="modal-title" id="modalEncaissementLabel">
+                    <i class="bi bi-cash-coin me-2"></i>Encaisser la vente
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label small">Montant à encaisser</label>
+                    <div class="input-group">
+                        <input type="number" step="0.01" id="encMontant" class="form-control" readonly>
+                        <span class="input-group-text">FCFA</span>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label small">Mode de paiement *</label>
+                    <select id="encModePaiement" class="form-select" required>
+                        <option value="">-- Sélectionner --</option>
+                        <!-- Chargé en JS -->
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label small">Observations (facultatif)</label>
+                    <textarea id="encObservations" class="form-control" rows="2" placeholder="Ex: Chèque client X, Ref: 12345"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-warning btn-sm" id="btnConfirmEncaissement">
+                    <i class="bi bi-check2 me-1"></i>Confirmer encaissement
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Encaissement modal
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('modalEncaissement');
+    const btnEncaisser = document.querySelector('[data-bs-target="#modalEncaissement"]');
+    const encMontant = document.getElementById('encMontant');
+    const encModePaiement = document.getElementById('encModePaiement');
+    const encObservations = document.getElementById('encObservations');
+    const btnConfirm = document.getElementById('btnConfirmEncaissement');
+    
+    let currentVenteId = null;
+    
+    // Charger les modes de paiement au démarrage
+    loadModesPaiement();
+    
+    // Au clic sur "Encaisser", pré-remplir le montant
+    if (btnEncaisser) {
+        btnEncaisser.addEventListener('click', function() {
+            currentVenteId = this.dataset.venteId;
+            encMontant.value = parseFloat(this.dataset.montant).toFixed(2);
+        });
+    }
+    
+    // Clic "Confirmer encaissement"
+    btnConfirm.addEventListener('click', function() {
+        if (!currentVenteId || !encModePaiement.value) {
+            alert('Veuillez sélectionner un mode de paiement');
+            return;
+        }
+        
+        const payload = {
+            vente_id: currentVenteId,
+            montant: parseFloat(encMontant.value),
+            mode_paiement_id: parseInt(encModePaiement.value),
+            observations: encObservations.value
+        };
+        
+        // Afficher loading
+        btnConfirm.disabled = true;
+        btnConfirm.innerHTML = '<i class="bi bi-hourglass-split"></i> Traitement...';
+        
+        fetch('<?= url_for('ventes/api_encaisser.php') ?>', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Succès
+                alert('✓ Encaissement enregistré!\nVous allez être redirigé.');
+                window.location.href = '<?= url_for('ventes/list.php') ?>';
+            } else {
+                alert('❌ Erreur: ' + (data.message || 'Impossible d\'encaisser'));
+                btnConfirm.disabled = false;
+                btnConfirm.innerHTML = '<i class="bi bi-check2 me-1"></i>Confirmer encaissement';
+            }
+        })
+        .catch(err => {
+            console.error('Erreur:', err);
+            alert('❌ Erreur réseau: ' + err.message);
+            btnConfirm.disabled = false;
+            btnConfirm.innerHTML = '<i class="bi bi-check2 me-1"></i>Confirmer encaissement';
+        });
+    });
+    
+    function loadModesPaiement() {
+        fetch('<?= url_for('ajax/modes_paiement.php') ?>', {
+            headers: {'X-Requested-With': 'XMLHttpRequest'}
+        })
+        .then(res => res.json())
+        .then(modes => {
+            encModePaiement.innerHTML = '<option value="">-- Sélectionner --</option>';
+            modes.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.id;
+                opt.textContent = m.libelle;
+                encModePaiement.appendChild(opt);
+            });
+        })
+        .catch(err => console.error('Erreur chargement modes:', err));
+    }
+});
+</script>
 
 <?php include __DIR__ . '/../partials/footer.php'; ?>

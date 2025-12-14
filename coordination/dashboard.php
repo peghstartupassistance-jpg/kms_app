@@ -83,6 +83,7 @@ $statsLivraisons = $stmt->fetch();
 
 include __DIR__ . '/../partials/header.php';
 include __DIR__ . '/../partials/sidebar.php';
+include __DIR__ . '/navigation.php';  // Navigation coordination
 ?>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 

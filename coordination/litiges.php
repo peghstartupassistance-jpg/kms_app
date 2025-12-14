@@ -290,19 +290,52 @@ async function postForm(url, data) {
                                         <span class="badge bg-<?= $badgeClass ?>">
                                             <?= str_replace('_', ' ', $litige['statut_traitement']) ?>
                                         </span>
+                                        <?php if ($litige['statut_traitement'] === 'REMBOURSEMENT_EFFECTUE' && !empty($litige['montant_rembourse'])): ?>
+                                            <div class="mt-1"><small class="text-primary">💰 <?= number_format($litige['montant_rembourse'], 0, ',', ' ') ?> FCFA</small></div>
+                                        <?php elseif ($litige['statut_traitement'] === 'REMPLACEMENT_EFFECTUE' && !empty($litige['quantite_remplacee'])): ?>
+                                            <div class="mt-1"><small class="text-info">📦 Qté: <?= (int)$litige['quantite_remplacee'] ?></small></div>
+                                        <?php elseif ($litige['statut_traitement'] === 'RESOLU' && !empty($litige['montant_avoir'])): ?>
+                                            <div class="mt-1"><small class="text-success">🎫 Avoir: <?= number_format($litige['montant_avoir'], 0, ',', ' ') ?> FCFA</small></div>
+                                        <?php endif; ?>
                                     </td>
                                     <td><?= htmlspecialchars($litige['responsable'] ?? '-') ?></td>
                                     <td class="text-end">
                                         <div class="btn-group">
-                                            <button class="btn btn-sm btn-outline-success" onclick="ouvrirMajLitige(<?= (int)$litige['id'] ?>, 'RESOLU')">
-                                                <i class="bi bi-check2-circle"></i>
+                                            <button class="btn btn-sm btn-outline-secondary btn-voir-details" 
+                                                data-litige='<?= json_encode([
+                                                    "id" => $litige["id"],
+                                                    "numero_vente" => $litige["numero_vente"],
+                                                    "date_retour" => $litige["date_retour"],
+                                                    "client_nom" => $litige["client_nom"],
+                                                    "client_telephone" => $litige["client_telephone"],
+                                                    "code_produit" => $litige["code_produit"],
+                                                    "produit_designation" => $litige["produit_designation"],
+                                                    "type_probleme" => $litige["type_probleme"],
+                                                    "motif" => $litige["motif"],
+                                                    "solution" => $litige["solution"],
+                                                    "statut_traitement" => $litige["statut_traitement"],
+                                                    "responsable" => $litige["responsable"],
+                                                    "montant_rembourse" => $litige["montant_rembourse"],
+                                                    "quantite_remplacee" => $litige["quantite_remplacee"],
+                                                    "montant_avoir" => $litige["montant_avoir"]
+                                                ]) ?>' 
+                                                title="Voir détails">
+                                                <i class="bi bi-eye"></i>
                                             </button>
-                                            <button class="btn btn-sm btn-outline-info" onclick="ouvrirMajLitige(<?= (int)$litige['id'] ?>, 'REMPLACEMENT_EFFECTUE')" title="Produit remplacé">
-                                                <i class="bi bi-box-seam"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-primary" onclick="ouvrirMajLitige(<?= (int)$litige['id'] ?>, 'REMBOURSEMENT_EFFECTUE')" title="Remboursement">
+                                            <?php if ($litige['statut_traitement'] === 'EN_COURS'): ?>
+                                            <button class="btn btn-sm btn-outline-primary" onclick="ouvrirRemboursement(<?= (int)$litige['id'] ?>)" title="Rembourser le client">
                                                 <i class="bi bi-cash-coin"></i>
                                             </button>
+                                            <button class="btn btn-sm btn-outline-info" onclick="ouvrirRemplacement(<?= (int)$litige['id'] ?>, <?= (int)($litige['produit_id'] ?? 0) ?>)" title="Remplacer le produit">
+                                                <i class="bi bi-box-seam"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-success" onclick="ouvrirAvoir(<?= (int)$litige['id'] ?>)" title="Accorder un avoir">
+                                                <i class="bi bi-receipt"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" onclick="ouvrirAbandon(<?= (int)$litige['id'] ?>)" title="Abandonner">
+                                                <i class="bi bi-x-circle"></i>
+                                            </button>
+                                            <?php endif; ?>
                                         </div>
                                     </td>
                                 </tr>
@@ -379,27 +412,137 @@ async function postForm(url, data) {
     </div>
 </div>
 
-<!-- Modal Mise à jour Litige -->
-<div class="modal fade" id="modalMajLitige" tabindex="-1" aria-hidden="true">
+<!-- Modal Remboursement -->
+<div class="modal fade" id="modalRemboursement" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="bi bi-pencil-square me-2"></i> Mettre à jour le litige</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="bi bi-cash-coin me-2"></i> Remboursement client</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="formMajLitige">
-                    <input type="hidden" name="id" id="majLitigeId">
-                    <input type="hidden" name="statut" id="majLitigeStatut">
-                    <div class="mb-2">
-                        <label class="form-label small">Solution apportée</label>
-                        <textarea name="solution" class="form-control" rows="3"></textarea>
+                <form id="formRemboursement">
+                    <input type="hidden" name="id" id="remboursementLitigeId">
+                    <input type="hidden" name="statut" value="REMBOURSEMENT_EFFECTUE">
+                    <div class="mb-3">
+                        <label class="form-label">Montant à rembourser (FCFA) <span class="text-danger">*</span></label>
+                        <input type="number" name="montant_rembourse" class="form-control" step="0.01" min="0" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Solution apportée</label>
+                        <textarea name="solution" class="form-control" rows="3" placeholder="Décrivez la solution..."></textarea>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                <button type="button" class="btn btn-primary" id="btnMajLitige">Enregistrer</button>
+                <button type="button" class="btn btn-primary" id="btnRemboursement">Confirmer le remboursement</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Remplacement -->
+<div class="modal fade" id="modalRemplacement" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title"><i class="bi bi-box-seam me-2"></i> Remplacement produit</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formRemplacement">
+                    <input type="hidden" name="id" id="remplacementLitigeId">
+                    <input type="hidden" name="statut" value="REMPLACEMENT_EFFECTUE">
+                    <div class="mb-3">
+                        <label class="form-label">Quantité à remplacer <span class="text-danger">*</span></label>
+                        <input type="number" name="quantite_remplacement" class="form-control" min="1" value="1" required>
+                        <small class="form-text text-muted">Le stock sera ajusté automatiquement</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Solution apportée</label>
+                        <textarea name="solution" class="form-control" rows="3" placeholder="Décrivez la solution..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-info" id="btnRemplacement">Confirmer le remplacement</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Avoir -->
+<div class="modal fade" id="modalAvoir" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="bi bi-receipt me-2"></i> Avoir client</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formAvoir">
+                    <input type="hidden" name="id" id="avoirLitigeId">
+                    <input type="hidden" name="statut" value="RESOLU">
+                    <div class="mb-3">
+                        <label class="form-label">Montant de l'avoir (FCFA) <span class="text-danger">*</span></label>
+                        <input type="number" name="montant_avoir" class="form-control" step="0.01" min="0" required>
+                        <small class="form-text text-muted">L'avoir sera utilisable sur les prochains achats</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Solution apportée</label>
+                        <textarea name="solution" class="form-control" rows="3" placeholder="Décrivez la solution..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-success" id="btnAvoir">Confirmer l'avoir</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Abandon -->
+<div class="modal fade" id="modalAbandon" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-x-circle me-2"></i> Abandonner le litige</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formAbandon">
+                    <input type="hidden" name="id" id="abandonLitigeId">
+                    <input type="hidden" name="statut" value="ABANDONNE">
+                    <div class="mb-3">
+                        <label class="form-label">Motif de l'abandon <span class="text-danger">*</span></label>
+                        <textarea name="solution" class="form-control" rows="3" placeholder="Expliquez pourquoi ce litige est abandonné..." required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-danger" id="btnAbandon">Confirmer l'abandon</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Détails -->
+<div class="modal fade" id="modalDetails" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-secondary text-white">
+                <h5 class="modal-title"><i class="bi bi-info-circle me-2"></i> Détails du litige <span id="detailsLitigeNumero"></span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="detailsContent">
+                <!-- Contenu chargé dynamiquement -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
             </div>
         </div>
     </div>
@@ -505,23 +648,292 @@ document.getElementById('btnCreateLitige').addEventListener('click', async funct
     }
 });
 
-function ouvrirMajLitige(id, statut){
-    document.getElementById('majLitigeId').value = id;
-    document.getElementById('majLitigeStatut').value = statut;
-    const modalEl = document.getElementById('modalMajLitige');
+// Fonctions d'ouverture des modales
+function ouvrirRemboursement(id){
+    document.getElementById('remboursementLitigeId').value = id;
+    document.getElementById('formRemboursement').reset();
+    document.querySelector('#formRemboursement input[name="id"]').value = id;
+    const modalEl = document.getElementById('modalRemboursement');
     bootstrap.Modal.getOrCreateInstance(modalEl).show();
 }
 
-document.getElementById('btnMajLitige').addEventListener('click', async function(){
-    const form = document.getElementById('formMajLitige');
-    const data = Object.fromEntries(new FormData(form).entries());
-    const res = await postForm('<?= url_for("coordination/api/litiges_update.php") ?>', data);
-    if (res.success) {
-        const modalEl = document.getElementById('modalMajLitige');
-        bootstrap.Modal.getOrCreateInstance(modalEl).hide();
-        location.reload();
-    } else {
-        alert(res.message || 'Erreur lors de la mise à jour');
+// Event listener pour les boutons Voir détails
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.btn-voir-details').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const litige = JSON.parse(this.getAttribute('data-litige'));
+            voirDetails(litige);
+        });
+    });
+});
+
+function voirDetails(litige) {
+    const statusBadges = {
+        'EN_COURS': { class: 'warning', label: 'En cours' },
+        'RESOLU': { class: 'success', label: 'Résolu' },
+        'REMPLACEMENT_EFFECTUE': { class: 'info', label: 'Remplacement effectué' },
+        'REMBOURSEMENT_EFFECTUE': { class: 'primary', label: 'Remboursement effectué' },
+        'ABANDONNE': { class: 'secondary', label: 'Abandonné' }
+    };
+    
+    const typeBadges = {
+        'DEFAUT_PRODUIT': { class: 'danger', label: 'Défaut produit' },
+        'LIVRAISON_NON_CONFORME': { class: 'warning', label: 'Livraison non conforme' },
+        'RETARD_LIVRAISON': { class: 'warning', label: 'Retard livraison' },
+        'ERREUR_COMMANDE': { class: 'danger', label: 'Erreur commande' },
+        'INSATISFACTION_CLIENT': { class: 'info', label: 'Insatisfaction client' }
+    };
+    
+    const status = statusBadges[litige.statut_traitement] || { class: 'secondary', label: litige.statut_traitement };
+    const type = typeBadges[litige.type_probleme] || { class: 'secondary', label: litige.type_probleme };
+    
+    document.getElementById('detailsLitigeNumero').textContent = '#' + litige.id;
+    
+    let html = `
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-3 text-muted"><i class="bi bi-calendar3"></i> Informations générales</h6>
+                        <dl class="row mb-0">
+                            <dt class="col-sm-5">Date retour:</dt>
+                            <dd class="col-sm-7">${new Date(litige.date_retour).toLocaleDateString('fr-FR')}</dd>
+                            
+                            <dt class="col-sm-5">Client:</dt>
+                            <dd class="col-sm-7">
+                                <strong>${litige.client_nom || '-'}</strong><br>
+                                <small class="text-muted">${litige.client_telephone || '-'}</small>
+                            </dd>
+                            
+                            <dt class="col-sm-5">Vente:</dt>
+                            <dd class="col-sm-7">${litige.numero_vente || '-'}</dd>
+                            
+                            <dt class="col-sm-5">Responsable:</dt>
+                            <dd class="col-sm-7">${litige.responsable || '-'}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-3 text-muted"><i class="bi bi-box"></i> Produit concerné</h6>
+                        <dl class="row mb-0">
+                            <dt class="col-sm-5">Code:</dt>
+                            <dd class="col-sm-7">${litige.code_produit || '-'}</dd>
+                            
+                            <dt class="col-sm-5">Désignation:</dt>
+                            <dd class="col-sm-7">${litige.produit_designation || '-'}</dd>
+                            
+                            <dt class="col-sm-5">Type problème:</dt>
+                            <dd class="col-sm-7"><span class="badge bg-${type.class}">${type.label}</span></dd>
+                            
+                            <dt class="col-sm-5">Statut:</dt>
+                            <dd class="col-sm-7"><span class="badge bg-${status.class}">${status.label}</span></dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted"><i class="bi bi-chat-left-text"></i> Motif du litige</h6>
+                        <p class="mb-0">${litige.motif || '<em class="text-muted">Aucun motif renseigné</em>'}</p>
+                    </div>
+                </div>
+            </div>`;
+    
+    if (litige.solution) {
+        html += `
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted"><i class="bi bi-check-circle"></i> Solution apportée</h6>
+                        <p class="mb-0">${litige.solution}</p>
+                    </div>
+                </div>
+            </div>`;
+    }
+    
+    if (litige.montant_rembourse > 0) {
+        html += `
+            <div class="col-12">
+                <div class="alert alert-primary mb-0">
+                    <i class="bi bi-cash-coin"></i> <strong>Remboursement effectué:</strong> ${parseFloat(litige.montant_rembourse).toLocaleString('fr-FR')} FCFA
+                </div>
+            </div>`;
+    }
+    
+    if (litige.quantite_remplacee > 0) {
+        html += `
+            <div class="col-12">
+                <div class="alert alert-info mb-0">
+                    <i class="bi bi-box-seam"></i> <strong>Remplacement effectué:</strong> ${litige.quantite_remplacee} unité(s)
+                </div>
+            </div>`;
+    }
+    
+    if (litige.montant_avoir > 0) {
+        html += `
+            <div class="col-12">
+                <div class="alert alert-success mb-0">
+                    <i class="bi bi-receipt"></i> <strong>Avoir accordé:</strong> ${parseFloat(litige.montant_avoir).toLocaleString('fr-FR')} FCFA
+                </div>
+            </div>`;
+    }
+    
+    html += `</div>`;
+    
+    document.getElementById('detailsContent').innerHTML = html;
+    
+    const modalEl = document.getElementById('modalDetails');
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+}
+
+function ouvrirRemplacement(id, produitId){
+    document.getElementById('remplacementLitigeId').value = id;
+    document.getElementById('formRemplacement').reset();
+    document.querySelector('#formRemplacement input[name="id"]').value = id;
+    const modalEl = document.getElementById('modalRemplacement');
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+}
+
+function ouvrirAvoir(id){
+    document.getElementById('avoirLitigeId').value = id;
+    document.getElementById('formAvoir').reset();
+    document.querySelector('#formAvoir input[name="id"]').value = id;
+    const modalEl = document.getElementById('modalAvoir');
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+}
+
+function ouvrirAbandon(id){
+    document.getElementById('abandonLitigeId').value = id;
+    document.getElementById('formAbandon').reset();
+    document.querySelector('#formAbandon input[name="id"]').value = id;
+    const modalEl = document.getElementById('modalAbandon');
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+}
+
+// Handlers de soumission
+document.getElementById('btnRemboursement').addEventListener('click', async function(){
+    const btn = this;
+    const form = document.getElementById('formRemboursement');
+    const fd = new FormData(form);
+    const montant = parseFloat(fd.get('montant_rembourse'));
+    
+    if (!montant || montant <= 0) {
+        alert('Veuillez saisir un montant valide.');
+        return;
+    }
+    
+    btn.disabled = true;
+    try {
+        const data = Object.fromEntries(fd.entries());
+        const res = await postForm('<?= url_for("coordination/api/litiges_update.php") ?>', data);
+        if (res.success) {
+            const modalEl = document.getElementById('modalRemboursement');
+            bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+            location.reload();
+        } else {
+            alert(res.message || 'Erreur lors du remboursement');
+        }
+    } catch (e) {
+        alert('Erreur: ' + e.message);
+    } finally {
+        btn.disabled = false;
+    }
+});
+
+document.getElementById('btnRemplacement').addEventListener('click', async function(){
+    const btn = this;
+    const form = document.getElementById('formRemplacement');
+    const fd = new FormData(form);
+    const quantite = parseInt(fd.get('quantite_remplacement'));
+    
+    if (!quantite || quantite <= 0) {
+        alert('Veuillez saisir une quantité valide.');
+        return;
+    }
+    
+    btn.disabled = true;
+    try {
+        const data = Object.fromEntries(fd.entries());
+        const res = await postForm('<?= url_for("coordination/api/litiges_update.php") ?>', data);
+        if (res.success) {
+            const modalEl = document.getElementById('modalRemplacement');
+            bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+            location.reload();
+        } else {
+            alert(res.message || 'Erreur lors du remplacement');
+        }
+    } catch (e) {
+        alert('Erreur: ' + e.message);
+    } finally {
+        btn.disabled = false;
+    }
+});
+
+document.getElementById('btnAvoir').addEventListener('click', async function(){
+    const btn = this;
+    const form = document.getElementById('formAvoir');
+    const fd = new FormData(form);
+    const montant = parseFloat(fd.get('montant_avoir'));
+    
+    if (!montant || montant <= 0) {
+        alert('Veuillez saisir un montant valide.');
+        return;
+    }
+    
+    btn.disabled = true;
+    try {
+        const data = Object.fromEntries(fd.entries());
+        const res = await postForm('<?= url_for("coordination/api/litiges_update.php") ?>', data);
+        if (res.success) {
+            const modalEl = document.getElementById('modalAvoir');
+            bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+            location.reload();
+        } else {
+            alert(res.message || 'Erreur lors de la création de l\'avoir');
+        }
+    } catch (e) {
+        alert('Erreur: ' + e.message);
+    } finally {
+        btn.disabled = false;
+    }
+});
+
+document.getElementById('btnAbandon').addEventListener('click', async function(){
+    const btn = this;
+    const form = document.getElementById('formAbandon');
+    const fd = new FormData(form);
+    const motif = fd.get('solution');
+    
+    if (!motif || motif.trim() === '') {
+        alert('Veuillez saisir un motif d\'abandon.');
+        return;
+    }
+    
+    if (!confirm('Êtes-vous sûr de vouloir abandonner ce litige ?')) {
+        return;
+    }
+    
+    btn.disabled = true;
+    try {
+        const data = Object.fromEntries(fd.entries());
+        const res = await postForm('<?= url_for("coordination/api/litiges_update.php") ?>', data);
+        if (res.success) {
+            const modalEl = document.getElementById('modalAbandon');
+            bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+            location.reload();
+        } else {
+            alert(res.message || 'Erreur lors de l\'abandon');
+        }
+    } catch (e) {
+        alert('Erreur: ' + e.message);
+    } finally {
+        btn.disabled = false;
     }
 });
 

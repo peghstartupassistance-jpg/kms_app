@@ -867,4 +867,64 @@ eference_type = 'CORRECTION'\ ne trouvait pas pi�ce type \CORRECTION_OUVERTURE
 **Résumé :**
 L'application est désormais robuste sur la gestion des transactions, la cohérence caisse/stock/compta, et prête pour la sécurisation des endpoints. Prochaine étape : Phase 3 (sécurité POST/CSRF sur endpoints critiques).
 
-**Dernière mise à jour :** 14 décembre 2025 (refactoring sécurité, transactions, caisse, BL)
+---
+
+### SESSION 14 DÉCEMBRE 2025 (Matin) — SIGNATURE BL ÉLECTRONIQUE & CORRECTIONS SCHÉMA
+
+**Signature BL Électronique (Phase 1.3):**
+
+**API corrigée:**
+- `livraisons/api_signer_bl.php` - Endpoint signature BL
+  - ✅ Permission `VENTES_ECRIRE` requise (pas `VENTES_LIRE`)
+  - ✅ Validation CSRF via header `X-CSRF-Token` ou payload
+  - ✅ Aligné schéma réel : met `signe_client=1`, journalise dans `observations`
+  - ✅ Transaction-aware : utilise `PDO::inTransaction()` pour éviter transactions imbriquées
+  - ✅ Idempotent : refuse les signatures multiples, retourne succès si déjà signé
+  - ✅ Audit trail : append "[Signature BL] YYYY-MM-DD HH:MM - Client: XXX - Note: YYY" à observations
+  - ✅ Erreurs structurées : 400 (params), 403 (CSRF), 404 (BL), 500 (erreur serveur)
+
+**Frontend signature:**
+- `livraisons/detail.php` - Affichage BL avec bouton signature
+  - ✅ Bouton "Obtenir signature" visible si `signe_client=0` et statut ≠ ANNULE
+  - ✅ Bouton masqué et badge "Document signé" affiché si `signe_client=1`
+  - ✅ Inclut modal signature et handler JS
+  
+- `livraisons/modal_signature.php` - Modal Bootstrap 5
+  - ✅ Canvas HTML5 pour saisie signature (SignaturePad.js v4.0.0)
+  - ✅ Champ "Nom du signataire" obligatoire
+  - ✅ Boutons : Effacer signature, Annuler, Confirmer signature
+  - ✅ Passe `csrfToken` depuis `$_SESSION['csrf_token']` au JS
+  - ✅ Messages de statut : succès (vert), erreur (rouge), loading (bleu)
+
+- `assets/js/signature-handler.js` - Gestion capture + API
+  - ✅ Initialise SignaturePad au chargement du modal
+  - ✅ Valide : signature non-vide + nom signataire fourni
+  - ✅ Appel API en POST JSON : `bl_id`, `client_nom`, `note`, `X-CSRF-Token`
+  - ✅ N'envoie **pas** l'image binaire (schéma sans colonne image)
+  - ✅ Gestion erreurs : affiche message et log console
+  - ✅ Succès : redirection automatique après 1.5s vers page détail BL
+
+**Corrections schéma & création BL:**
+
+1. **Schéma `bons_livraison_lignes`**
+   - ✅ Colonne `designation` **n'existe pas** (récupérée via JOIN produits)
+   - ✅ Colonne `prix_unitaire` **n'existe pas** (idem)
+   - ✅ Colonnes réelles : `bon_livraison_id`, `produit_id`, `quantite`, `quantite_commandee`, `quantite_restante`
+
+2. **`livraisons/create.php`**
+   - ✅ Supprimé insertion `designation` et `prix_unitaire` (ne correspondent à aucune colonne)
+   - ✅ INSERT réduit aux 5 colonnes : `bon_livraison_id, produit_id, quantite, quantite_commandee, quantite_restante`
+   - ✅ Corrigé appel fonction : `ajouterMouvement()` (inexistante) → `stock_enregistrer_mouvement()` (réelle, dans `lib/stock.php`)
+   - ✅ Format appel : tableau associatif avec clés `produit_id`, `type_mouvement`, `quantite`, `source_type`, `source_id`, `commentaire`, `utilisateur_id`, `date_mouvement`
+
+3. **Alerte colonne manquante en SELECT**
+   - ✅ `livraisons/detail.php` déjà correct : SELECT `p.designation` et `p.prix_vente as prix_unitaire` (via JOIN)
+   - ✅ `livraisons/print.php` déjà correct : idem
+   - ✅ `livraisons/detail_navigation.php` déjà correct : idem
+   - ✅ Le problème venait du INSERT, pas du SELECT
+
+**Validation:**
+- ✅ Syntaxe PHP : `php -l livraisons/api_signer_bl.php`, `livraisons/modal_signature.php`, `livraisons/create.php` → Aucune erreur
+- ✅ Test création BL : ne génère plus l'erreur "Unknown column 'designation'" ni "Call to undefined function ajouterMouvement()"
+
+**Dernière mise à jour :** 14 décembre 2025 (signature BL électronique, corrections schéma livraisons)

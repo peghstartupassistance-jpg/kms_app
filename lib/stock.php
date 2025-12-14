@@ -183,9 +183,14 @@ function stock_synchroniser_vente(PDO $pdo, int $venteId): void
         return; // aucune ligne -> pas de mouvement
     }
 
-    // ✅ PHASE 2 : Transaction garanti de fermeture
+    // ✅ PHASE 2 : Transaction garanti de fermeture (transaction-aware)
+    // Détecte si déjà dans une transaction pour éviter imbrication
+    $transactionOuverte = $pdo->inTransaction();
+    
     try {
-        $pdo->beginTransaction();
+        if (!$transactionOuverte) {
+            $pdo->beginTransaction();
+        }
         
         // Suppression des anciens mouvements
         stock_supprimer_mouvements_source($pdo, 'VENTE', $venteId);
@@ -213,12 +218,20 @@ function stock_synchroniser_vente(PDO $pdo, int $venteId): void
             ]);
         }
 
-        $pdo->commit();
+        // Commit uniquement si on a ouvert la transaction nous-mêmes
+        if (!$transactionOuverte) {
+            $pdo->commit();
+        }
     } catch (Exception $e) {
-        if ($pdo->inTransaction()) {
+        // Rollback uniquement si on a ouvert la transaction nous-mêmes
+        if (!$transactionOuverte && $pdo->inTransaction()) {
             $pdo->rollBack();
         }
         error_log('[STOCK] Erreur synchronisation vente ' . $venteId . ': ' . $e->getMessage());
+        // Re-throw l'exception si dans transaction parente pour permettre rollback global
+        if ($transactionOuverte) {
+            throw $e;
+        }
     }
 }
 
@@ -264,9 +277,14 @@ function stock_synchroniser_achat(PDO $pdo, int $achatId): void
         return; // aucune ligne -> pas de mouvement
     }
 
-    // ✅ PHASE 2 : Transaction garanti de fermeture
+    // ✅ PHASE 2 : Transaction garanti de fermeture (transaction-aware)
+    // Détecte si déjà dans une transaction pour éviter imbrication
+    $transactionOuverte = $pdo->inTransaction();
+    
     try {
-        $pdo->beginTransaction();
+        if (!$transactionOuverte) {
+            $pdo->beginTransaction();
+        }
         
         // Suppression des anciens mouvements
         stock_supprimer_mouvements_source($pdo, 'ACHAT', $achatId);
@@ -294,11 +312,19 @@ function stock_synchroniser_achat(PDO $pdo, int $achatId): void
             ]);
         }
 
-        $pdo->commit();
+        // Commit uniquement si on a ouvert la transaction nous-mêmes
+        if (!$transactionOuverte) {
+            $pdo->commit();
+        }
     } catch (Exception $e) {
-        if ($pdo->inTransaction()) {
+        // Rollback uniquement si on a ouvert la transaction nous-mêmes
+        if (!$transactionOuverte && $pdo->inTransaction()) {
             $pdo->rollBack();
         }
         error_log('[STOCK] Erreur synchronisation achat ' . $achatId . ': ' . $e->getMessage());
+        // Re-throw l'exception si dans transaction parente pour permettre rollback global
+        if ($transactionOuverte) {
+            throw $e;
+        }
     }
 }

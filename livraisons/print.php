@@ -45,7 +45,7 @@ $lignes = $stmt->fetchAll();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bon de Livraison <?= htmlspecialchars($bl['numero_bl']) ?></title>
+    <title>Bon de Livraison <?= htmlspecialchars($bl['numero']) ?></title>
     <style>
         @page {
             margin: 1cm;
@@ -269,7 +269,7 @@ $lignes = $stmt->fetchAll();
             </div>
             <div class="doc-info">
                 <div class="doc-type">BON DE LIVRAISON</div>
-                <div class="doc-number"><?= htmlspecialchars($bl['numero_bl']) ?></div>
+                <div class="doc-number"><?= htmlspecialchars($bl['numero']) ?></div>
                 <p>Date BL : <?= date('d/m/Y', strtotime($bl['date_bl'])) ?></p>
                 <p>Facture : <?= htmlspecialchars($bl['vente_numero']) ?></p>
                 <span class="status-badge status-<?= $bl['statut'] ?>">
@@ -328,10 +328,10 @@ $lignes = $stmt->fetchAll();
             </tbody>
         </table>
         
-        <?php if ($bl['commentaires']): ?>
+        <?php if (!empty($bl['observations'])): ?>
             <div style="background: #fff3cd; padding: 15px; margin: 20px 0; border-left: 4px solid #f39c12;">
-                <strong>Remarques :</strong><br>
-                <?= nl2br(htmlspecialchars($bl['commentaires'])) ?>
+                <strong>Observations :</strong><br>
+                <?= nl2br(htmlspecialchars($bl['observations'])) ?>
             </div>
         <?php endif; ?>
         
