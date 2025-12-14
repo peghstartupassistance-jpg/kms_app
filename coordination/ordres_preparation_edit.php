@@ -45,6 +45,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verifierCsrf($csrf);
     
     $vente_id = $_POST['vente_id'] ?? null;
+    
+    // Vérifier que la vente peut être préparée
+    if ($vente_id) {
+        $stmtCheck = $pdo->prepare("SELECT statut FROM ventes WHERE id = ?");
+        $stmtCheck->execute([$vente_id]);
+        $venteCheck = $stmtCheck->fetch();
+        
+        if ($venteCheck && $venteCheck['statut'] === 'LIVREE') {
+            $_SESSION['flash_error'] = "Cette vente est déjà entièrement livrée. Impossible de créer un ordre de préparation.";
+            header('Location: ' . url_for('coordination/ordres_preparation.php'));
+            exit;
+        }
+        if ($venteCheck && $venteCheck['statut'] === 'ANNULEE') {
+            $_SESSION['flash_error'] = "Cette vente est annulée. Impossible de créer un ordre de préparation.";
+            header('Location: ' . url_for('coordination/ordres_preparation.php'));
+            exit;
+        }
+    }
+    
     $type_demande = $_POST['type_demande'] ?? 'NORMALE';
     $instructions = $_POST['instructions'] ?? null;
     $date_livraison_souhaitee = $_POST['date_livraison_souhaitee'] ?? null;
@@ -128,6 +147,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+$venteIdPreselect = isset($_GET['vente_id']) ? (int)$_GET['vente_id'] : null;
+
 // Liste des ventes non préparées (pour création)
 if ($mode === 'creation') {
     $stmtVentes = $pdo->query("
@@ -135,8 +156,8 @@ if ($mode === 'creation') {
                c.nom
         FROM ventes v
         INNER JOIN clients c ON v.client_id = c.id
-        WHERE v.statut = 'EN_ATTENTE_LIVRAISON'
-          AND v.id NOT IN (SELECT vente_id FROM ordres_preparation WHERE statut != 'LIVRE')
+        WHERE v.statut IN ('EN_ATTENTE_LIVRAISON', 'PARTIELLEMENT_LIVREE')
+          AND v.id NOT IN (SELECT vente_id FROM ordres_preparation WHERE statut NOT IN ('LIVRE', 'ANNULE'))
         ORDER BY v.date_vente DESC
         LIMIT 100
     ");
@@ -158,9 +179,17 @@ include __DIR__ . '/../partials/sidebar.php';
             <?= $mode === 'creation' ? 'Nouvelle demande de préparation' : 'Ordre ' . htmlspecialchars($ordre['numero_ordre']) ?>
         </h1>
         
-        <a href="<?= url_for('coordination/ordres_preparation.php') ?>" class="btn btn-secondary btn-sm">
-            <i class="bi bi-arrow-left"></i> Retour
-        </a>
+        <div class="d-flex gap-2">
+            <?php if ($mode === 'edition' && $ordre['statut'] === 'PRET'): ?>
+                <a href="<?= url_for('livraisons/create.php?ordre_id=' . (int)$ordre['id'] . '&vente_id=' . (int)$ordre['vente_id']) ?>" 
+                   class="btn btn-success btn-sm">
+                    <i class="bi bi-truck"></i> Créer bon de livraison
+                </a>
+            <?php endif; ?>
+            <a href="<?= url_for('coordination/ordres_preparation.php') ?>" class="btn btn-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Retour
+            </a>
+        </div>
     </div>
 
     <?php if ($mode === 'edition'): ?>
@@ -267,7 +296,7 @@ include __DIR__ . '/../partials/sidebar.php';
                         <select name="vente_id" class="form-select" required>
                             <option value="">-- Sélectionner une vente --</option>
                             <?php foreach ($ventes_disponibles as $v): ?>
-                                <option value="<?= $v['id'] ?>">
+                                <option value="<?= $v['id'] ?>" <?= $venteIdPreselect === (int)$v['id'] ? 'selected' : '' ?>>
                                     <?= htmlspecialchars($v['numero']) ?> - 
                                     <?= htmlspecialchars($v['nom']) ?> - 
                                     <?= number_format($v['montant_total_ttc'], 0, ',', ' ') ?> FCFA - 

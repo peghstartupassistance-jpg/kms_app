@@ -260,6 +260,80 @@ body {
     padding: 0;
     margin: 0;
 }
+.kms-sidebar.vertical-collapsed {
+    min-height: auto;
+    height: 70px; /* même hauteur que la navbar */
+    overflow: hidden;
+}
+.kms-sidebar.vertical-collapsed .sidebar-header {
+    padding: 0.75rem 1rem;
+}
+.kms-sidebar.vertical-collapsed .sidebar-nav,
+.kms-sidebar.vertical-collapsed .sidebar-footer {
+    display: none;
+}
+.layout-with-sidebar.vertical-collapsed .kms-main {
+    /* quand verticalement pliée, utiliser toute la hauteur */
+    min-height: calc(100vh - 70px);
+}
+
+.sidebar-toggle-vertical-btn {
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #fff;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 0.6rem;
+    padding: 0.4rem 0.6rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-left: 0.5rem;
+}
+.sidebar-toggle-vertical-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+.kms-sidebar.collapsed {
+    width: 72px;
+}
+.kms-sidebar.collapsed .sidebar-header .sidebar-brand span,
+.kms-sidebar.collapsed .sidebar-section-title,
+.kms-sidebar.collapsed .sidebar-item span,
+.kms-sidebar.collapsed .sidebar-footer span,
+.kms-sidebar.collapsed .sidebar-user-section .sidebar-item span {
+    display: none;
+}
+.kms-sidebar.collapsed .sidebar-item {
+    justify-content: center;
+}
+.kms-sidebar.collapsed .sidebar-item i {
+    font-size: 1.2rem;
+}
+.kms-main {
+    flex: 1;
+}
+.layout-with-sidebar {
+    display: flex;
+}
+.layout-with-sidebar .kms-main {
+    width: calc(100% - 260px);
+}
+.layout-with-sidebar.sidebar-collapsed .kms-main {
+    width: calc(100% - 72px);
+}
+
+/* Navbar toggle button */
+.sidebar-toggle-btn {
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #fff;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 0.6rem;
+    padding: 0.4rem 0.6rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.sidebar-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
 
 /* Sidebar Header */
 .sidebar-header {
@@ -318,6 +392,34 @@ body {
     color: var(--muted);
     letter-spacing: 0.8px;
     margin-top: 0.5rem;
+}
+
+/* Collapsible modules inside sidebar */
+.sidebar-section-title.button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+}
+.sidebar-section-title.button .chevron {
+    transition: transform var(--transition-fast);
+}
+.sidebar-section.collapsed .sidebar-section-title.button .chevron {
+    transform: rotate(-90deg);
+}
+.section-content {
+    overflow: hidden;
+    max-height: 1200px;
+    opacity: 1;
+    transition: max-height var(--transition-base), opacity var(--transition-fast);
+}
+.sidebar-section.collapsed .section-content {
+    max-height: 0;
+    opacity: 0;
+}
+.sidebar-section.collapsed {
+    margin-bottom: 0;
 }
 
 /* Sidebar Items */
@@ -394,6 +496,31 @@ body {
     padding-left: 2.75rem;
     font-size: 0.9rem;
     font-weight: 400;
+}
+/* ═══════════════════════════════════════════════════════════════════════════════
+   Dropdowns in Tables – Visibility Fix
+   Ensure Bootstrap dropdowns are not clipped inside table-responsive wrappers
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.table-responsive {
+    overflow: visible !important;
+    position: relative;
+}
+.table {
+    border-collapse: separate !important;
+}
+.table-responsive tbody,
+.table-responsive tr,
+.table-responsive td {
+    overflow: visible !important;
+    position: relative;
+}
+.table-responsive .dropdown {
+    position: relative;
+    z-index: 1;
+}
+.table-responsive .dropdown-menu {
+    z-index: 2000 !important;
 }
 
 .sidebar-item-nested::after {

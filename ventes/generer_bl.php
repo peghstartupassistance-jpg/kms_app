@@ -1,6 +1,7 @@
 <?php
 // ventes/generer_bl.php
 require_once __DIR__ . '/../security.php';
+require_once __DIR__ . '/../lib/stock.php';
 exigerConnexion();
 exigerPermission('VENTES_CREER');
 
@@ -75,6 +76,12 @@ try {
         $qteRestante = max(0, $qteCommandee - $qteLivree);
 
         if ($qteRestante > 0) {
+            // Vérifier le stock disponible avant de générer le BL
+            $stockDispo = (float)($lv['stock_actuel'] ?? 0);
+            if ($stockDispo < $qteRestante) {
+                throw new RuntimeException("Stock insuffisant pour le produit #$prodId (restant à livrer: $qteRestante, stock: $stockDispo)");
+            }
+
             $lignesALivrer[] = [
                 'produit_id' => $prodId,
                 'quantite'   => $qteRestante,
@@ -89,6 +96,7 @@ try {
     // Création du BL + mouvements de stock en transaction
     $pdo->beginTransaction();
 
+    $dateBL = date('Y-m-d');
     $numeroBL = 'BL-' . date('Ymd-His');
 
     $utilisateur = utilisateurConnecte();
@@ -103,7 +111,7 @@ try {
     ");
     $stmt->execute([
         'numero'        => $numeroBL,
-        'date_bl'       => date('Y-m-d'),
+        'date_bl'       => $dateBL,
         'vente_id'      => $venteId,
         'client_id'     => $vente['client_id'],
         'transport'     => null,
@@ -136,7 +144,7 @@ try {
         // Enregistrer le mouvement via l'API centralisée
         stock_enregistrer_mouvement($pdo, [
             'produit_id'     => $prodId,
-            'date_mouvement' => date('Y-m-d H:i:s'),
+            'date_mouvement' => $dateBL . ' ' . date('H:i:s'),
             'type_mouvement' => 'SORTIE',
             'quantite'       => $qte,
             'source_type'    => 'VENTE',

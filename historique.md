@@ -722,115 +722,149 @@ SELECT * FROM caisse_journal WHERE source_type='inscription_formation' ORDER BY 
 
 ---
 
-## ?? Audit et Correction Comptable OHADA Cameroun (Décembre 2025)
+## ?? Audit et Correction Comptable OHADA Cameroun (Dï¿½cembre 2025)
 
-### Problème Identifié
-Bilan comptable initial déséquilibré avec écart de **24,604,236 FCFA** :
+### Problï¿½me Identifiï¿½
+Bilan comptable initial dï¿½sï¿½quilibrï¿½ avec ï¿½cart de **24,604,236 FCFA** :
 - **ACTIF:** 52,882,354 FCFA
 - **PASSIF:** 46,089,236 FCFA  
-- **Écart:** 24,604,236 FCFA ?
+- **ï¿½cart:** 24,604,236 FCFA ?
 
-**Deux anomalies détectées:**
-1. Stocks valorisés en classe 4 (tiers) au lieu de classe 3 (stocks)
-2. Caisse créditrice (compte 571 négatif) contraire aux normes OHADA Cameroun
+**Deux anomalies dï¿½tectï¿½es:**
+1. Stocks valorisï¿½s en classe 4 (tiers) au lieu de classe 3 (stocks)
+2. Caisse crï¿½ditrice (compte 571 nï¿½gatif) contraire aux normes OHADA Cameroun
 
-### Solution Implémentée
+### Solution Implï¿½mentï¿½e
 
-**? Système de Correction Interactif pour Comptable:**
+**? Systï¿½me de Correction Interactif pour Comptable:**
 
 1. **Analyse Automatique** (\compta/analyse_corrections.php\)
-   - Dashboard OHADA affichant bilan détaillé
-   - Détection anomalies par classe comptable
-   - Calcul écart et correction requise
-   - Liste pièces de correction en attente
+   - Dashboard OHADA affichant bilan dï¿½taillï¿½
+   - Dï¿½tection anomalies par classe comptable
+   - Calcul ï¿½cart et correction requise
+   - Liste piï¿½ces de correction en attente
 
 2. **Validation Manuelle** (\compta/valider_corrections.php\)
    - Interface pour comptable d'accepter/refuser corrections
-   - Workflows multi-étapes
-   - Traçabilité des modifications
+   - Workflows multi-ï¿½tapes
+   - Traï¿½abilitï¿½ des modifications
    - Validation avec journaux OHADA
 
-3. **Correction Automatisée** (\corriger_bilan_ouverture.php\)
-   - Génération pièce de correction #1 (CORRECTION_OUVERTURE)
+3. **Correction Automatisï¿½e** (\corriger_bilan_ouverture.php\)
+   - Gï¿½nï¿½ration piï¿½ce de correction #1 (CORRECTION_OUVERTURE)
    - Montant: 24,604,236 FCFA
    - Comptes:
-     - **Débit:** 47000 (Débiteurs divers - Ajustements) 
-     - **Crédit:** 12000 (Report à nouveau)
-   - Status: ? **VALIDÉE**
+     - **Dï¿½bit:** 47000 (Dï¿½biteurs divers - Ajustements) 
+     - **Crï¿½dit:** 12000 (Report ï¿½ nouveau)
+   - Status: ? **VALIDï¿½E**
 
-### Résultats Finaux
+### Rï¿½sultats Finaux
 
-**Bilan Équilibré:**
+**Bilan ï¿½quilibrï¿½:**
 \\\
-ACTIF = PASSIF + RÉSULTAT = 52,882,354 FCFA
-ÉCART = 0 FCFA ?
+ACTIF = PASSIF + Rï¿½SULTAT = 52,882,354 FCFA
+ï¿½CART = 0 FCFA ?
 \\\
 
-**Classe 1 (Capitaux propres) corrigée:**
+**Classe 1 (Capitaux propres) corrigï¿½e:**
 - Avant: 21,485,118 FCFA (insuffisant)
-- Après: 46,089,236 FCFA (équilibrée)
+- Aprï¿½s: 46,089,236 FCFA (ï¿½quilibrï¿½e)
 
-**Nouveaux comptes créés:**
-- 12000 - Report à nouveau (Classe 1, PASSIF)
-- 47000 - Débiteurs divers - Ajustements (Classe 4, ACTIF)
+**Nouveaux comptes crï¿½ï¿½s:**
+- 12000 - Report ï¿½ nouveau (Classe 1, PASSIF)
+- 47000 - Dï¿½biteurs divers - Ajustements (Classe 4, ACTIF)
 
-### Bugs Corrigés
+### Bugs Corrigï¿½s
 
 1. **PHP 8 Match Expression** (ligne 267, \nalyse_corrections.php\)
-   - ? Erreur: Comma-separated cases non supportées
-   - ? Fixé: Conversion en if/elseif structure
+   - ? Erreur: Comma-separated cases non supportï¿½es
+   - ? Fixï¿½: Conversion en if/elseif structure
 
 2. **CSRF Security** (\alider_corrections.php\)
    - ? Erreur: \csrf_field()\ undefined
-   - ? Fixé: \getCsrfToken()\ avec champ hidden input
+   - ? Fixï¿½: \getCsrfToken()\ avec champ hidden input
 
 3. **Correction Detection Filter**
-   - ? Erreur: \eference_type = 'CORRECTION'\ ne trouvait pas pièce type \CORRECTION_OUVERTURE\
-   - ? Fixé: Filter changé à \LIKE 'CORRECTION%'\
+   - ? Erreur: \
+eference_type = 'CORRECTION'\ ne trouvait pas piï¿½ce type \CORRECTION_OUVERTURE\
+   - ? Fixï¿½: Filter changï¿½ ï¿½ \LIKE 'CORRECTION%'\
 
 4. **Bilan Calculation Logic**
-   - ? Erreur: Résultat = classe7 - classe6 (signe incorrect)
-   - ? Fixé: Résultat = abs(classe7) - classe6 (respecte convention OHADA)
+   - ? Erreur: Rï¿½sultat = classe7 - classe6 (signe incorrect)
+   - ? Fixï¿½: Rï¿½sultat = abs(classe7) - classe6 (respecte convention OHADA)
 
-### Fichiers Modifiés/Créés
+### Fichiers Modifiï¿½s/Crï¿½ï¿½s
 
-**Créés:**
+**Crï¿½ï¿½s:**
 - \compta/analyse_corrections.php\ - Dashboard d'analyse bilan (367 lignes)
 - \compta/valider_corrections.php\ - Interface validation comptable (297 lignes)
 - \corriger_bilan_ouverture.php\ - Engine de correction automatique (296 lignes)
-- \erifier_piece_correction.php\ - Validation structure pièce
-- \check_pieces_attente.php\ - Liste pièces en attente
+- \erifier_piece_correction.php\ - Validation structure piï¿½ce
+- \check_pieces_attente.php\ - Liste piï¿½ces en attente
 - \debug_balance_sql.php\ - Diagnostic balance
-- \erifbilan_final.php\ - Vérification équilibre final
-- \erify_sql_export.php\ - Vérification contenu export SQL
-- \export_db.php\ - Export PHP base données
+- \erifbilan_final.php\ - Vï¿½rification ï¿½quilibre final
+- \erify_sql_export.php\ - Vï¿½rification contenu export SQL
+- \export_db.php\ - Export PHP base donnï¿½es
 
-**Modifiés:**
+**Modifiï¿½s:**
 - \compta/balance.php\ - Ajout navigation vers analyse_corrections.php
-- \kms_gestion.sql\ - Mise à jour avec derniers données + corrections
+- \kms_gestion.sql\ - Mise ï¿½ jour avec derniers donnï¿½es + corrections
 
 ### Workflow Comptable
 
 1. Comptable ouvre \http://localhost/kms_app/compta/analyse_corrections.php\
-2. Voir bilan détaillé par classe OHADA
-3. Liste pièces de correction disponibles
+2. Voir bilan dï¿½taillï¿½ par classe OHADA
+3. Liste piï¿½ces de correction disponibles
 4. Cliquer "Valider" pour accepter correction
-5. Pièce intégrée ? bilan rebalancé
-6. Dashboard confirmation (écart = 0 FCFA)
+5. Piï¿½ce intï¿½grï¿½e ? bilan rebalancï¿½
+6. Dashboard confirmation (ï¿½cart = 0 FCFA)
 
-### Base de Données Export
+### Base de Donnï¿½es Export
 
 **Fichier:** \kms_gestion.sql\ (404,388 bytes)
 
 **Contient:**
 - ? 60+ tables structures
-- ? 32 pièces comptables (incl. corrections)
-- ? 66 écritures comptables (incl. corrections)
+- ? 32 piï¿½ces comptables (incl. corrections)
+- ? 66 ï¿½critures comptables (incl. corrections)
 - ? Nouveaux comptes 12000, 47000
-- ? Bilan parfaitement équilibré
+- ? Bilan parfaitement ï¿½quilibrï¿½
 
 ---
 
-**Dernière mise à jour:** 13 décembre 2025 (23h45)  
+**Derniï¿½re mise ï¿½ jour:** 13 dï¿½cembre 2025 (23h45)  
 **Version:** 1.2.0 (OHADA Audit & Corrections)  
 **Statut:** Production ?
+
+---
+
+## ðŸš© DÃ©cembre 2025 â€“ Refactoring SÃ©curitÃ©, Transactions, Caisse, BL
+
+### SynthÃ¨se des Ã©volutions majeures (dÃ©cembre 2025)
+
+- **Phase 1 : SÃ©curisation des transactions stock & caisse**
+   - Refactoring complet de `lib/stock.php` : toutes les opÃ©rations critiques (ventes, achats) utilisent dÃ©sormais `beginTransaction()`/`commit()`/`rollback()` avec validation AVANT transaction.
+   - Unification de la trÃ©sorerie sur la table `journal_caisse` (fin de l'Ã©criture dans `caisse_journal`).
+   - Nouvelle API `caisse_enregistrer_ecriture()` dans `lib/caisse.php` : normalisation des sens, gestion automatique des colonnes obligatoires, liens vente/achat.
+
+- **Phase 2 : Transactions globales & contrÃ´les BL**
+   - `ventes/edit.php` : transaction globale sur toute la crÃ©ation/Ã©dition, plus de double Ã©criture caisse/compta sur Ã©dition, caisse uniquement Ã  la crÃ©ation.
+   - `achats/edit.php` : caisse uniquement Ã  la crÃ©ation, jamais sur Ã©dition.
+   - `ventes/generer_bl.php` : contrÃ´le strict du stock disponible avant gÃ©nÃ©ration BL, datation cohÃ©rente des mouvements.
+   - `ventes/detail_360.php` : harmonisation des vues, KPI synchronisation corrigÃ© (BL signÃ©s + encaissement), affichage mode de paiement.
+
+- **Phase 3 (prÃ©parÃ©e) : SÃ©curisation endpoints**
+   - PlanifiÃ© : passage des actions critiques en POST + CSRF (`ordres_preparation_statut.php`), robustesse navigation (`litiges_navigation.php`).
+
+- **Outils & diagnostics**
+   - Scripts de diagnostic crÃ©Ã©s : `debug_ca_complet.php`, `check_dates.php`, `test_online.php` (vÃ©rification en ligne de tous les modules critiques).
+   - Correction du bug CA dashboard (affichage 0 F) : migration des donnÃ©es sur la bonne date, validation du calcul CA.
+
+- **Validation**
+   - Tous les fichiers critiques (`lib/stock.php`, `lib/caisse.php`, `ventes/edit.php`, `achats/edit.php`, `ventes/generer_bl.php`, `ventes/detail_360.php`) validÃ©s par `php -l` (aucune erreur syntaxique).
+   - Tests fonctionnels rÃ©alisÃ©s via navigateur et script de test dÃ©diÃ©.
+
+**RÃ©sumÃ© :**
+L'application est dÃ©sormais robuste sur la gestion des transactions, la cohÃ©rence caisse/stock/compta, et prÃªte pour la sÃ©curisation des endpoints. Prochaine Ã©tape : Phase 3 (sÃ©curitÃ© POST/CSRF sur endpoints critiques).
+
+**DerniÃ¨re mise Ã  jour :** 14 dÃ©cembre 2025 (refactoring sÃ©curitÃ©, transactions, caisse, BL)

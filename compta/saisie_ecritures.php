@@ -61,19 +61,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             try {
                 $pdo->beginTransaction();
                 
-                // Générer numéro de pièce
+                // ✅ SÉCURISATION: Générer numéro de pièce avec séquence fiable
                 $stmt = $pdo->prepare("SELECT code FROM compta_journaux WHERE id = ?");
                 $stmt->execute([$journal_id]);
                 $journal = $stmt->fetch();
-                $numero_piece = $journal['code'] . '-' . date('Y') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
                 
-                // Créer la pièce
+                // Compter les pièces du jour pour ce journal
+                $stmt = $pdo->prepare("
+                    SELECT COUNT(*) as cnt 
+                    FROM compta_pieces 
+                    WHERE journal_id = ? 
+                    AND DATE(date_piece) = DATE(?)
+                ");
+                $stmt->execute([$journal_id, $date_piece]);
+                $count = $stmt->fetch()['cnt'] ?? 0;
+                $seq = str_pad($count + 1, 4, '0', STR_PAD_LEFT);
+                
+                $numero_piece = $journal['code'] . '-' . date('Y') . '-' . date('md') . '-' . $seq;
+                
+                // Vérifier l'unicité (double-check)
+                $stmtCheck = $pdo->prepare("SELECT id FROM compta_pieces WHERE numero_piece = ?");
+                $stmtCheck->execute([$numero_piece]);
+                if ($stmtCheck->fetch()) {
+                    throw new Exception("Numéro pièce déjà existant. Réessayez.");
+                }
+                
+                // Créer la pièce SANS VALIDATION (état brouillon)
                 $stmt = $pdo->prepare("
                     INSERT INTO compta_pieces 
-                    (numero_piece, journal_id, date_piece, libelle, exercice_id, est_validee, created_at)
-                    VALUES (?, ?, ?, ?, ?, 1, NOW())
+                    (numero_piece, journal_id, date_piece, libelle, exercice_id, est_validee, utilisateur_id, created_at)
+                    VALUES (?, ?, ?, ?, ?, 0, ?, NOW())
                 ");
-                $stmt->execute([$numero_piece, $journal_id, $date_piece, $libelle_piece, $exercice['id']]);
+                $utilisateur_id = $_SESSION['user_id'] ?? 1;
+                $stmt->execute([$numero_piece, $journal_id, $date_piece, $libelle_piece, $exercice['id'], $utilisateur_id]);
                 $piece_id = $pdo->lastInsertId();
                 
                 // Créer les écritures
@@ -94,10 +114,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 }
                 
                 $pdo->commit();
-                $success = "Pièce $numero_piece enregistrée et validée avec succès !";
+                $success = "Pièce $numero_piece enregistrée en BROUILLON. Allez à Valider pièces pour la finaliser.";
                 
             } catch (Exception $e) {
-                $pdo->rollBack();
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
                 $errors[] = "Erreur lors de l'enregistrement : " . $e->getMessage();
             }
         }

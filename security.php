@@ -1,6 +1,12 @@
 <?php
 // security.php
 
+// 0. Forcer UTF-8 pour TOUTES les pages
+if (!headers_sent()) {
+    header('Content-Type: text/html; charset=UTF-8');
+}
+mb_internal_encoding('UTF-8');
+
 // 1. Session
 if (session_status() === PHP_SESSION_NONE) {
     session_start();

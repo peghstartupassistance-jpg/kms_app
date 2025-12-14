@@ -222,10 +222,16 @@ $total_passif_resultat = $total_passif + $resultat_exercice;
                         <h2 class="mb-1">Bilan Comptable (OHADA)</h2>
                         <p class="text-muted mb-0">Exercice <?= htmlspecialchars($exercice['annee'] ?? 'N/A') ?></p>
                     </div>
-                    <a href="<?= url_for('compta/export_bilan.php?exercice_id=' . ($exercice['id'] ?? 0)) ?>" 
-                       class="btn btn-success">
-                        <i class="bi bi-file-earmark-excel me-1"></i> Exporter Excel
-                    </a>
+                    <div class="btn-group" role="group">
+                        <a href="<?= url_for('compta/analyse_corrections.php') ?>" 
+                           class="btn btn-outline-warning btn-sm">
+                            <i class="bi bi-pencil-square me-1"></i> Corrections OHADA
+                        </a>
+                        <a href="<?= url_for('compta/export_bilan.php?exercice_id=' . ($exercice['id'] ?? 0)) ?>" 
+                           class="btn btn-success btn-sm">
+                            <i class="bi bi-file-earmark-excel me-1"></i> Exporter Excel
+                        </a>
+                    </div>
                 </div>
                 
                 <!-- ACTIF ET PASSIF -->

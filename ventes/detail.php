@@ -1,6 +1,7 @@
 <?php
 // ventes/detail.php
 require_once __DIR__ . '/../security.php';
+require_once __DIR__ . '/../lib/stock.php';
 exigerConnexion();
 exigerPermission('VENTES_LIRE');
 
@@ -62,7 +63,17 @@ $stmt = $pdo->prepare("
 ");
 $stmt->execute(['id' => $id]);
 $bonsLivraison = $stmt->fetchAll();
-
+// Ordres de préparation liés
+$stmt = $pdo->prepare("
+    SELECT op.*, u.nom_complet as commercial_nom, m.nom_complet as magasinier_nom
+    FROM ordres_preparation op
+    LEFT JOIN utilisateurs u ON op.commercial_responsable_id = u.id
+    LEFT JOIN utilisateurs m ON op.magasinier_id = m.id
+    WHERE op.vente_id = :id
+    ORDER BY op.date_ordre DESC, op.id DESC
+");
+$stmt->execute(['id' => $id]);
+$ordresPreparation = $stmt->fetchAll();
 $peutModifierVente = in_array('VENTES_CREER', $_SESSION['permissions'] ?? [], true);
 $peutCreerBL       = $peutModifierVente;
 
@@ -94,14 +105,27 @@ include __DIR__ . '/../partials/sidebar.php';
                     <i class="bi bi-pencil-square me-1"></i> Modifier
                 </a>
             <?php endif; ?>
+            <?php if ($peutModifierVente && in_array($vente['statut'], ['EN_ATTENTE_LIVRAISON','PARTIELLEMENT_LIVREE'], true)): ?>
+                <a href="<?= url_for('coordination/ordres_preparation_edit.php?vente_id=' . (int)$vente['id']) ?>"
+                   class="btn btn-warning btn-sm"
+                   title="Créer un ordre de préparation">
+                    <i class="bi bi-clipboard-check me-1"></i> Créer ordre de préparation
+                </a>
+            <?php elseif ($peutModifierVente && $vente['statut'] === 'LIVREE'): ?>
+                <button class="btn btn-warning btn-sm" disabled title="Vente déjà livrée">
+                    <i class="bi bi-clipboard-check me-1"></i> Créer ordre de préparation
+                </button>
+            <?php endif; ?>
             <?php if ($peutCreerBL && in_array($vente['statut'], ['EN_ATTENTE_LIVRAISON','PARTIELLEMENT_LIVREE'], true)): ?>
-                <form method="post" action="<?= htmlspecialchars($ventesGenererBlUrl) ?>">
-                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(getCsrfToken()) ?>">
-                    <input type="hidden" name="vente_id" value="<?= (int)$vente['id'] ?>">
-                    <button type="submit" class="btn btn-primary btn-sm">
-                        <i class="bi bi-truck me-1"></i> Générer un bon de livraison
-                    </button>
-                </form>
+                <a href="<?= url_for('livraisons/create.php?vente_id=' . (int)$vente['id']) ?>"
+                   class="btn btn-primary btn-sm"
+                   title="Créer un bon de livraison">
+                    <i class="bi bi-truck me-1"></i> Créer bon de livraison
+                </a>
+            <?php elseif ($peutCreerBL && $vente['statut'] === 'LIVREE'): ?>
+                <button class="btn btn-primary btn-sm" disabled title="Vente déjà entièrement livrée">
+                    <i class="bi bi-truck me-1"></i> Créer bon de livraison
+                </button>
             <?php endif; ?>
         </div>
     </div>
@@ -118,6 +142,50 @@ include __DIR__ . '/../partials/sidebar.php';
             <i class="bi bi-exclamation-triangle me-1"></i>
             <?= htmlspecialchars($flashError) ?>
         </div>
+    <?php endif; ?>
+
+    <!-- Workflow d'aide -->
+    <?php if (empty($ordresPreparation) && empty($bonsLivraison) && in_array($vente['statut'], ['EN_ATTENTE_LIVRAISON','PARTIELLEMENT_LIVREE'], true)): ?>
+    <div class="alert alert-info">
+        <h6 class="alert-heading">
+            <i class="bi bi-info-circle"></i> Workflow de livraison
+        </h6>
+        <p class="mb-2"><strong>2 options pour livrer cette vente :</strong></p>
+        <div class="row g-2">
+            <div class="col-md-6">
+                <div class="card border-warning">
+                    <div class="card-body p-3">
+                        <h6 class="text-warning">
+                            <i class="bi bi-1-circle-fill"></i> Processus complet (recommandé)
+                        </h6>
+                        <ol class="mb-0 small">
+                            <li>Créer un <strong>ordre de préparation</strong> (coordination avec magasin)</li>
+                            <li>Le magasinier prépare les articles → Statut PRET</li>
+                            <li>Créer le <strong>bon de livraison</strong> depuis l'ordre</li>
+                            <li>Client signe le BL → Stock mis à jour automatiquement</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-success">
+                    <div class="card-body p-3">
+                        <h6 class="text-success">
+                            <i class="bi bi-2-circle-fill"></i> Processus rapide
+                        </h6>
+                        <ol class="mb-0 small">
+                            <li>Créer directement un <strong>bon de livraison</strong></li>
+                            <li>Livraison physique au client</li>
+                            <li>Client signe le BL → Stock mis à jour</li>
+                        </ol>
+                        <small class="text-muted d-block mt-2">
+                            <i class="bi bi-lightbulb"></i> Utilisez cette option pour les petites ventes
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <?php endif; ?>
 
     <!-- Infos vente -->
@@ -199,10 +267,81 @@ include __DIR__ . '/../partials/sidebar.php';
         </div>
     </div>
 
+    <!-- Ordres de préparation -->
+    <?php if (!empty($ordresPreparation)): ?>
+    <div class="card mb-3">
+        <div class="card-body">
+            <h2 class="h6 mb-3">
+                <i class="bi bi-clipboard-check text-warning"></i> Ordres de préparation
+                <span class="badge bg-secondary"><?= count($ordresPreparation) ?></span>
+            </h2>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle">
+                    <thead class="table-light">
+                    <tr>
+                        <th>N° Ordre</th>
+                        <th>Date</th>
+                        <th>Commercial</th>
+                        <th>Magasinier</th>
+                        <th>Priorité</th>
+                        <th>Statut</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($ordresPreparation as $op): ?>
+                        <?php
+                        $badgeClass = 'bg-secondary';
+                        if ($op['statut'] === 'EN_ATTENTE') $badgeClass = 'bg-warning';
+                        elseif ($op['statut'] === 'EN_PREPARATION') $badgeClass = 'bg-info';
+                        elseif ($op['statut'] === 'PRET') $badgeClass = 'bg-success';
+                        elseif ($op['statut'] === 'LIVRE') $badgeClass = 'bg-primary';
+                        elseif ($op['statut'] === 'ANNULE') $badgeClass = 'bg-danger';
+                        ?>
+                        <tr>
+                            <td>
+                                <a href="<?= url_for('coordination/ordres_preparation_edit.php?id=' . (int)$op['id']) ?>">
+                                    <strong><?= htmlspecialchars($op['numero_ordre']) ?></strong>
+                                </a>
+                            </td>
+                            <td><?= htmlspecialchars($op['date_ordre']) ?></td>
+                            <td><?= htmlspecialchars($op['commercial_nom'] ?? 'N/A') ?></td>
+                            <td><?= htmlspecialchars($op['magasinier_nom'] ?? 'Non assigné') ?></td>
+                            <td>
+                                <span class="badge bg-<?= $op['priorite'] === 'TRES_URGENTE' ? 'danger' : ($op['priorite'] === 'URGENTE' ? 'warning' : 'secondary') ?>">
+                                    <?= htmlspecialchars($op['priorite']) ?>
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge <?= $badgeClass ?>">
+                                    <?= htmlspecialchars($op['statut']) ?>
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <?php if ($op['statut'] === 'PRET' && $peutCreerBL): ?>
+                                    <a href="<?= url_for('livraisons/create.php?ordre_id=' . (int)$op['id'] . '&vente_id=' . (int)$vente['id']) ?>"
+                                       class="btn btn-sm btn-success"
+                                       title="Créer BL depuis cet ordre">
+                                        <i class="bi bi-truck"></i> Créer BL
+                                    </a>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <!-- Bons de livraison associés -->
     <div class="card">
         <div class="card-body">
-            <h2 class="h6 mb-3">Bons de livraison liés</h2>
+            <h2 class="h6 mb-3">
+                <i class="bi bi-truck text-primary"></i> Bons de livraison liés
+                <span class="badge bg-secondary"><?= count($bonsLivraison) ?></span>
+            </h2>
             <?php if (empty($bonsLivraison)): ?>
                 <p class="text-muted mb-0">Aucun bon de livraison généré pour cette vente.</p>
             <?php else: ?>

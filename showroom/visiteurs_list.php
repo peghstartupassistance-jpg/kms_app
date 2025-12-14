@@ -96,7 +96,9 @@ $sql = "
     SELECT 
         vs.*,
         u.nom_complet AS utilisateur_nom,
-        c.nom AS client_nom_lie
+        c.nom AS client_nom_lie,
+        COALESCE(vs.converti_en_devis, 0) AS converti_en_devis,
+        COALESCE(vs.converti_en_vente, 0) AS converti_en_vente
     FROM visiteurs_showroom vs
     JOIN utilisateurs u ON u.id = vs.utilisateur_id
     LEFT JOIN clients c ON c.id = vs.client_id

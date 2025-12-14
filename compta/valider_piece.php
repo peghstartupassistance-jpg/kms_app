@@ -20,28 +20,59 @@ unset($_SESSION['flash_success'], $_SESSION['flash_error']);
 // ===== ACTIONS POST =====
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verifierCsrf($_POST['csrf_token'] ?? '');
+    
     $action_form = $_POST['action_form'] ?? '';
     
     if ($action_form === 'valider_une') {
         $piece_id = (int)($_POST['piece_id'] ?? 0);
         if ($piece_id > 0) {
-            // Vérifier que la pièce est équilibrée
-            $ecritures = compta_get_ecritures_piece($pdo, $piece_id);
-            $total_debit = 0;
-            $total_credit = 0;
-            foreach ($ecritures as $e) {
-                $total_debit += (float)($e['debit'] ?? 0);
-                $total_credit += (float)($e['credit'] ?? 0);
-            }
+            // ✅ Vérifications avant validation
+            $stmtPiece = $pdo->prepare("SELECT * FROM compta_pieces WHERE id = ?");
+            $stmtPiece->execute([$piece_id]);
+            $piece = $stmtPiece->fetch();
             
-            if (abs($total_debit - $total_credit) > 0.01) {
-                $_SESSION['flash_error'] = "Impossible : la pièce n'est pas équilibrée (débit ≠ crédit)";
+            if (!$piece) {
+                $_SESSION['flash_error'] = "Pièce introuvable";
+            } elseif ($piece['est_validee']) {
+                $_SESSION['flash_error'] = "Cette pièce est déjà validée";
             } else {
-                $stmt = $pdo->prepare("UPDATE compta_pieces SET est_validee = 1, updated_at = NOW() WHERE id = ?");
-                if ($stmt->execute([$piece_id])) {
-                    $_SESSION['flash_success'] = "Pièce validée";
+                // Vérifier que l'exercice est ouvert
+                $stmtExo = $pdo->prepare("SELECT est_clos FROM compta_exercices WHERE id = ?");
+                $stmtExo->execute([$piece['exercice_id']]);
+                $exo = $stmtExo->fetch();
+                
+                if ($exo && $exo['est_clos']) {
+                    $_SESSION['flash_error'] = "Impossible : exercice clôturé";
                 } else {
-                    $_SESSION['flash_error'] = "Erreur lors de la validation";
+                    // Vérifier équilibre
+                    $ecritures = compta_get_ecritures_piece($pdo, $piece_id);
+                    $total_debit = 0;
+                    $total_credit = 0;
+                    foreach ($ecritures as $e) {
+                        $total_debit += (float)($e['debit'] ?? 0);
+                        $total_credit += (float)($e['credit'] ?? 0);
+                    }
+                    
+                    if (abs($total_debit - $total_credit) > 0.01) {
+                        $_SESSION['flash_error'] = "Impossible : la pièce n'est pas équilibrée (débit ≠ crédit). Écart : " . number_format(abs($total_debit - $total_credit), 2);
+                    } else {
+                        // Valider avec traçabilité
+                        $utilisateur_id = $_SESSION['user_id'] ?? 1;
+                        $stmt = $pdo->prepare("
+                            UPDATE compta_pieces 
+                            SET est_validee = 1, 
+                                validee_par_id = ?, 
+                                date_validation = NOW(),
+                                updated_at = NOW() 
+                            WHERE id = ?
+                        ");
+                        if ($stmt->execute([$utilisateur_id, $piece_id])) {
+                            $_SESSION['flash_success'] = "Pièce #" . htmlspecialchars($piece['numero_piece']) . " validée";
+                        } else {
+                            $_SESSION['flash_error'] = "Erreur lors de la validation";
+                        }
+                    }
                 }
             }
         }
@@ -56,9 +87,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $nb_ok = 0;
             $nb_erreur = 0;
+            $utilisateur_id = $_SESSION['user_id'] ?? 1;
             
             foreach ($pieces as $pid) {
                 $pid = (int)$pid;
+                
+                // Vérifier exercice ouvert
+                $stmtPiece = $pdo->prepare("SELECT exercice_id FROM compta_pieces WHERE id = ?");
+                $stmtPiece->execute([$pid]);
+                $p = $stmtPiece->fetch();
+                if (!$p) continue;
+                
+                $stmtExo = $pdo->prepare("SELECT est_clos FROM compta_exercices WHERE id = ?");
+                $stmtExo->execute([$p['exercice_id']]);
+                $exo = $stmtExo->fetch();
+                if ($exo && $exo['est_clos']) {
+                    $nb_erreur++;
+                    continue;
+                }
+                
+                // Vérifier équilibre
                 $ecritures = compta_get_ecritures_piece($pdo, $pid);
                 $total_debit = 0;
                 $total_credit = 0;
@@ -68,18 +116,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 
                 if (abs($total_debit - $total_credit) < 0.01) {
-                    $stmt = $pdo->prepare("UPDATE compta_pieces SET est_validee = 1, updated_at = NOW() WHERE id = ?");
-                    if ($stmt->execute([$pid])) {
+                    $stmt = $pdo->prepare("
+                        UPDATE compta_pieces 
+                        SET est_validee = 1,
+                            validee_par_id = ?,
+                            date_validation = NOW(),
+                            updated_at = NOW() 
+                        WHERE id = ?
+                    ");
+                    if ($stmt->execute([$utilisateur_id, $pid])) {
                         $nb_ok++;
                     } else {
                         $nb_erreur++;
                     }
+                } else {
+                    $nb_erreur++;
                 }
             }
             
             $_SESSION['flash_success'] = "$nb_ok pièce(s) validée(s)";
             if ($nb_erreur > 0) {
-                $_SESSION['flash_error'] = "$nb_erreur pièce(s) non validée(s) (non équilibrée)";
+                $_SESSION['flash_error'] = "$nb_erreur pièce(s) non validée(s) (déséquilibrée ou exercice clos)";
             }
         }
         header('Location: valider_piece.php');

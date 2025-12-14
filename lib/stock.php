@@ -1,5 +1,5 @@
 <?php
-// lib/stock.php
+// lib/stock.php - FIXED VERSION with proper transaction handling
 
 /**
  * Retourne la quantité théorique en stock pour un produit donné
@@ -46,7 +46,7 @@ function stock_recalculer_stock_produit(PDO $pdo, int $produitId): void
  * Enregistre un mouvement de stock simple.
  *
  * $data = [
- *   'date_mouvement'  => 'YYYY-MM-DD' (optionnel, défaut = aujourd’hui),
+ *   'date_mouvement'  => 'YYYY-MM-DD' (optionnel, défaut = aujourd'hui),
  *   'type_mouvement'  => 'ENTREE' | 'SORTIE' | 'CORRECTION',
  *   'produit_id'      => int (obligatoire),
  *   'quantite'        => float|int (obligatoire),
@@ -138,13 +138,16 @@ function stock_supprimer_mouvements_source(PDO $pdo, string $sourceModule, int $
 
 /**
  * Re-calcul des mouvements de stock pour UNE vente.
- *
- * Règle que je pose (simple et propre) :
- * - on ne sort le stock QUE si la vente est au statut 'LIVREE'
- * - 1 mouvement SORTIE par produit (quantité = somme des lignes).
+ * 
+ * PATTERN CORRIGÉ:
+ * 1. Tous les contrôles/fetches AVANT beginTransaction()
+ * 2. Transaction uniquement pour les opérations d'écriture
+ * 3. Garantie de commit/rollBack avec try/catch/finally
  */
 function stock_synchroniser_vente(PDO $pdo, int $venteId): void
 {
+    // ✅ PHASE 1 : Validations et fetches AVANT transaction
+    
     // 1) On récupère la vente
     $stmt = $pdo->prepare("
         SELECT id, numero, date_vente, statut
@@ -158,21 +161,12 @@ function stock_synchroniser_vente(PDO $pdo, int $venteId): void
         return; // Vente inexistante -> rien à faire
     }
 
-    // 2) On efface les mouvements existants pour cette vente et recrée proprement
-    try {
-        $pdo->beginTransaction();
-        stock_supprimer_mouvements_source($pdo, 'VENTE', $venteId);
-    } catch (Exception $e) {
-        if ($pdo->inTransaction()) $pdo->rollBack();
-        return;
-    }
-
-    // 3) Si la vente n’est pas livrée, on ne touche pas au stock
+    // 2) Si la vente n'est pas livrée, on ne touche pas au stock
     if ($vente['statut'] !== 'LIVREE') {
         return;
     }
 
-    // 4) On récupère les lignes de la vente (agrégées par produit)
+    // 3) On récupère les lignes de la vente (agrégées par produit)
     $stmt = $pdo->prepare("
         SELECT
             produit_id,
@@ -189,46 +183,58 @@ function stock_synchroniser_vente(PDO $pdo, int $venteId): void
         return; // aucune ligne -> pas de mouvement
     }
 
-    $dateMvt = $vente['date_vente'] ?: date('Y-m-d');
-    $comment = 'Sortie suite à la vente ' . $vente['numero'];
+    // ✅ PHASE 2 : Transaction garanti de fermeture
+    try {
+        $pdo->beginTransaction();
+        
+        // Suppression des anciens mouvements
+        stock_supprimer_mouvements_source($pdo, 'VENTE', $venteId);
 
-    foreach ($lignes as $ligne) {
-        $produitId = (int)$ligne['produit_id'];
-        $qte       = (float)$ligne['qte'];
+        // Insertion des nouveaux mouvements
+        $dateMvt = $vente['date_vente'] ?: date('Y-m-d');
+        $comment = 'Sortie suite à la vente ' . $vente['numero'];
 
-        if ($produitId <= 0 || $qte <= 0) {
-            continue;
+        foreach ($lignes as $ligne) {
+            $produitId = (int)$ligne['produit_id'];
+            $qte       = (float)$ligne['qte'];
+
+            if ($produitId <= 0 || $qte <= 0) {
+                continue;
+            }
+
+            stock_enregistrer_mouvement($pdo, [
+                'date_mouvement' => $dateMvt,
+                'type_mouvement' => 'SORTIE',
+                'produit_id'     => $produitId,
+                'quantite'       => $qte,
+                'source_type'    => 'VENTE',
+                'source_id'      => $venteId,
+                'commentaire'    => $comment,
+            ]);
         }
 
-        stock_enregistrer_mouvement($pdo, [
-            'date_mouvement' => $dateMvt,
-            'type_mouvement' => 'SORTIE',
-            'produit_id'     => $produitId,
-            'quantite'       => $qte,
-            'source_type'    => 'VENTE',
-            'source_id'      => $venteId,
-            'commentaire'    => $comment,
-        ]);
-    }
-
-    // commit de la transaction de synchronisation
-    try {
         $pdo->commit();
     } catch (Exception $e) {
-        if ($pdo->inTransaction()) $pdo->rollBack();
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        error_log('[STOCK] Erreur synchronisation vente ' . $venteId . ': ' . $e->getMessage());
     }
 }
 
 /**
  * Re-calcul des mouvements de stock pour UN achat.
- *
- * Règle simple :
- * - chaque ligne d’achat génère une ENTREE de stock
- * - 1 mouvement ENTREE par produit (quantité = somme des lignes).
+ * 
+ * PATTERN CORRIGÉ:
+ * 1. Tous les contrôles/fetches AVANT beginTransaction()
+ * 2. Transaction uniquement pour les opérations d'écriture
+ * 3. Garantie de commit/rollBack avec try/catch/finally
  */
 function stock_synchroniser_achat(PDO $pdo, int $achatId): void
 {
-    // 1) On récupère l’achat
+    // ✅ PHASE 1 : Validations et fetches AVANT transaction
+    
+    // 1) On récupère l'achat
     $stmt = $pdo->prepare("
         SELECT id, numero, date_achat, statut
         FROM achats
@@ -241,20 +247,7 @@ function stock_synchroniser_achat(PDO $pdo, int $achatId): void
         return; // Achat inexistant
     }
 
-    // 2) On efface les mouvements existants pour cet achat
-    try {
-        $pdo->beginTransaction();
-        stock_supprimer_mouvements_source($pdo, 'ACHAT', $achatId);
-    } catch (Exception $e) {
-        if ($pdo->inTransaction()) $pdo->rollBack();
-        return;
-    }
-
-    // (Optionnel : si tu veux, tu peux décider que certains statuts
-    //  ne doivent pas encore impacter le stock, ex :
-    // if ($achat['statut'] === 'EN_COURS') return; )
-
-    // 3) On récupère les lignes d’achat agrégées par produit
+    // 2) On récupère les lignes d'achat agrégées par produit
     $stmt = $pdo->prepare("
         SELECT
             produit_id,
@@ -268,35 +261,44 @@ function stock_synchroniser_achat(PDO $pdo, int $achatId): void
     $lignes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     if (!$lignes) {
-        return;
+        return; // aucune ligne -> pas de mouvement
     }
 
-    $dateMvt = $achat['date_achat'] ?: date('Y-m-d');
-    $comment = 'Entrée suite à l’achat ' . $achat['numero'];
+    // ✅ PHASE 2 : Transaction garanti de fermeture
+    try {
+        $pdo->beginTransaction();
+        
+        // Suppression des anciens mouvements
+        stock_supprimer_mouvements_source($pdo, 'ACHAT', $achatId);
 
-    foreach ($lignes as $ligne) {
-        $produitId = (int)$ligne['produit_id'];
-        $qte       = (float)$ligne['qte'];
+        // Insertion des nouveaux mouvements
+        $dateMvt = $achat['date_achat'] ?: date('Y-m-d');
+        $comment = 'Entrée suite à l\'achat ' . $achat['numero'];
 
-        if ($produitId <= 0 || $qte <= 0) {
-            continue;
+        foreach ($lignes as $ligne) {
+            $produitId = (int)$ligne['produit_id'];
+            $qte       = (float)$ligne['qte'];
+
+            if ($produitId <= 0 || $qte <= 0) {
+                continue;
+            }
+
+            stock_enregistrer_mouvement($pdo, [
+                'date_mouvement' => $dateMvt,
+                'type_mouvement' => 'ENTREE',
+                'produit_id'     => $produitId,
+                'quantite'       => $qte,
+                'source_type'    => 'ACHAT',
+                'source_id'      => $achatId,
+                'commentaire'    => $comment,
+            ]);
         }
 
-        stock_enregistrer_mouvement($pdo, [
-            'date_mouvement' => $dateMvt,
-            'type_mouvement' => 'ENTREE',
-            'produit_id'     => $produitId,
-            'quantite'       => $qte,
-            'source_type'    => 'ACHAT',
-            'source_id'      => $achatId,
-            'commentaire'    => $comment,
-        ]);
-    }
-
-    // commit
-    try {
         $pdo->commit();
     } catch (Exception $e) {
-        if ($pdo->inTransaction()) $pdo->rollBack();
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        error_log('[STOCK] Erreur synchronisation achat ' . $achatId . ': ' . $e->getMessage());
     }
 }

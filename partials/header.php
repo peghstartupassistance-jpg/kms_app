@@ -1,5 +1,10 @@
 <?php
 // partials/header.php
+
+// Forcer l'encodage UTF-8 pour toutes les pages
+header('Content-Type: text/html; charset=UTF-8');
+mb_internal_encoding('UTF-8');
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -35,6 +40,7 @@ $logoutUrl = ($appBaseUrl !== '' ? $appBaseUrl : '') . '/logout.php';
 <html lang="fr">
 <head>
     <meta charset="utf-8">
+    <meta name="csrf-token" content="<?= getCsrfToken() ?>">
     <title>KMS – Back-office commercial</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -68,6 +74,17 @@ $logoutUrl = ($appBaseUrl !== '' ? $appBaseUrl : '') . '/logout.php';
                 <div class="brand-subtext">Système de Gestion</div>
             </div>
         </a>
+
+        <!-- Sidebar toggle (horizontal width) -->
+        <button class="sidebar-toggle-btn ms-3" id="toggleSidebarBtn" title="Plier/Déplier la sidebar">
+            <i class="bi bi-layout-sidebar"></i>
+            <span class="d-none d-md-inline">Sidebar</span>
+        </button>
+        <!-- Sidebar toggle (vertical height) -->
+        <button class="sidebar-toggle-vertical-btn ms-2" id="toggleSidebarVerticalBtn" title="Plier verticalement la sidebar">
+            <i class="bi bi-arrows-collapse"></i>
+            <span class="d-none d-md-inline">Vertical</span>
+        </button>
 
         <!-- Spacer -->
         <div class="navbar-spacer"></div>
@@ -106,4 +123,4 @@ $logoutUrl = ($appBaseUrl !== '' ? $appBaseUrl : '') . '/logout.php';
     </div>
 </nav>
 
-<div class="d-flex">
+<div class="layout-with-sidebar" id="layoutRoot">

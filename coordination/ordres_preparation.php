@@ -271,12 +271,17 @@ include __DIR__ . '/../partials/sidebar.php';
                                             </a>
                                             
                                             <?php if (peut('VENTES_MODIFIER') && $ordre['statut'] !== 'LIVRE'): ?>
-                                                <a href="ordres_preparation_statut.php?id=<?= $ordre['id'] ?>&action=suivant" 
-                                                   class="btn btn-sm btn-outline-success"
-                                                   onclick="return confirm('Passer au statut suivant ?')"
-                                                   title="Passer au statut suivant">
-                                                    <i class="bi bi-arrow-right-circle"></i>
-                                                </a>
+                                                <form method="post" action="ordres_preparation_statut.php" style="display:inline;">
+                                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(getCsrfToken()) ?>">
+                                                    <input type="hidden" name="id" value="<?= (int)$ordre['id'] ?>">
+                                                    <input type="hidden" name="action" value="suivant">
+                                                    <button type="submit" 
+                                                            class="btn btn-sm btn-outline-success"
+                                                            title="Passer au statut suivant"
+                                                            onclick="return confirm('Passer au statut suivant ?')">
+                                                        <i class="bi bi-arrow-right-circle"></i>
+                                                    </button>
+                                                </form>
                                             <?php endif; ?>
                                         </div>
                                     </td>

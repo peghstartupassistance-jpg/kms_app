@@ -64,7 +64,7 @@ function get_ordres_by_vente(PDO $pdo, int $venteId): array {
 }
 
 /**
- * Récupérer le montant total encaissé pour une vente
+ * Récupérer le montant total encaissé pour une vente (unified to journal_caisse)
  * @param PDO $pdo
  * @param int $venteId
  * @return float
@@ -72,10 +72,11 @@ function get_ordres_by_vente(PDO $pdo, int $venteId): array {
 function get_montant_encaisse(PDO $pdo, int $venteId): float {
     $stmt = $pdo->prepare("
         SELECT COALESCE(SUM(montant), 0) as total
-        FROM caisse_journal
-        WHERE (source_id = ? AND source_type = 'VENTE') OR commentaire LIKE ?
+        FROM journal_caisse
+        WHERE (vente_id = ? OR (source_id = ? AND source_type = 'VENTE'))
+          AND sens = 'RECETTE' AND est_annule = 0
     ");
-    $stmt->execute([$venteId, '%V' . str_pad($venteId, 6, '0', STR_PAD_LEFT) . '%']);
+    $stmt->execute([$venteId, $venteId]);
     return (float)$stmt->fetch()['total'];
 }
 

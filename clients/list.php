@@ -17,7 +17,6 @@ $typesClient = $stmtTypes->fetchAll();
 $typeId = isset($_GET['type_id']) ? (int)$_GET['type_id'] : 0;
 $statut = trim($_GET['statut'] ?? '');
 $q      = trim($_GET['q'] ?? '');
-
 $where  = [];
 $params = [];
 
@@ -56,7 +55,6 @@ $stmt->execute($params);
 $clients = $stmt->fetchAll();
 
 $peutCreer = in_array('CLIENTS_CREER', $_SESSION['permissions'] ?? [], true);
-
 $flashSuccess = $_SESSION['flash_success'] ?? null;
 unset($_SESSION['flash_success']);
 ?>
@@ -167,26 +165,24 @@ unset($_SESSION['flash_success']);
                                 </td>
                                 <td>
                                     <?php
-                                    $badgeClass = 'badge-status-secondary';
-                                    $badgeIcon = 'bi-person';
-                                    if ($c['statut'] === 'CLIENT') {
-                                        $badgeClass = 'badge-status-success';
-                                        $badgeIcon = 'bi-person-check-fill';
-                                    } elseif ($c['statut'] === 'PROSPECT') {
-                                        $badgeClass = 'badge-status-warning';
-                                        $badgeIcon = 'bi-person-plus-fill';
-                                    } elseif ($c['statut'] === 'APPRENANT') {
-                                        $badgeClass = 'badge-status-info';
-                                        $badgeIcon = 'bi-mortarboard-fill';
-                                    } elseif ($c['statut'] === 'HOTE') {
-                                        $badgeClass = 'badge-status-primary';
-                                        $badgeIcon = 'bi-building';
-                                    }
+                                    $statutsClients = [
+                                        'PROSPECT' => ['label' => 'Prospect', 'color' => 'warning', 'icon' => 'bi-person-plus'],
+                                        'CLIENT' => ['label' => 'Client', 'color' => 'success', 'icon' => 'bi-person-check'],
+                                        'APPRENANT' => ['label' => 'Apprenant', 'color' => 'info', 'icon' => 'bi-mortarboard'],
+                                        'HOTE' => ['label' => 'Hôte', 'color' => 'primary', 'icon' => 'bi-house-door']
+                                    ];
+                                    $currentStatut = $statutsClients[$c['statut']] ?? ['label' => $c['statut'], 'color' => 'secondary', 'icon' => 'bi-circle'];
                                     ?>
-                                    <span class="modern-badge <?= $badgeClass ?>">
-                                        <i class="<?= $badgeIcon ?>"></i>
-                                        <?= htmlspecialchars($c['statut']) ?>
-                                    </span>
+                                    <button class="btn btn-sm btn-outline-<?= $currentStatut['color'] ?>" 
+                                            type="button"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalChangerStatut"
+                                            data-client-id="<?= (int)$c['id'] ?>"
+                                            data-client-statut="<?= htmlspecialchars($c['statut']) ?>"
+                                            title="Changer le statut">
+                                        <i class="<?= $currentStatut['icon'] ?> me-1"></i>
+                                        <?= htmlspecialchars($currentStatut['label']) ?>
+                                    </button>
                                 </td>
                                 <td><?= htmlspecialchars($c['telephone'] ?? '') ?></td>
                                 <td><?= htmlspecialchars($c['email'] ?? '') ?></td>
@@ -211,5 +207,140 @@ unset($_SESSION['flash_success']);
         </div>
     </div>
 </div>
+
+<style>
+/* Fix pour les dropdowns dans les tables responsives */
+.table-responsive {
+    overflow: visible !important;
+}
+
+.card-body .table-responsive {
+    overflow-x: auto;
+    overflow-y: visible;
+}
+
+/* Assurer que les dropdowns sont au-dessus */
+.dropdown-menu {
+    z-index: 1050 !important;
+}
+</style>
+
+<script>
+// Test Bootstrap
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Bootstrap version:', typeof bootstrap !== 'undefined' ? 'Loaded' : 'NOT LOADED');
+    
+    // Initialiser manuellement les dropdowns si nécessaire
+    const dropdowns = document.querySelectorAll('[data-bs-toggle="dropdown"]');
+    console.log('Dropdowns trouvés:', dropdowns.length);
+    
+    dropdowns.forEach(function(dropdown) {
+        dropdown.addEventListener('click', function(e) {
+            console.log('Dropdown cliqué', e.target);
+        });
+    });
+});
+
+async function changerStatutClient(clientId, nouveauStatut) {
+    try {
+        const response = await fetch('<?= url_for("api/changer_statut.php") ?>', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                entite: 'client',
+                id: clientId,
+                statut: nouveauStatut
+            })
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+            // Afficher un message de succès
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-success alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3';
+            alertDiv.style.zIndex = '9999';
+            alertDiv.innerHTML = `
+                <i class="bi bi-check-circle-fill me-2"></i>
+                ${result.message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            // Recharger après 1 seconde
+            setTimeout(() => window.location.reload(), 1000);
+        } else {
+            alert('Erreur: ' + (result.message || 'Impossible de changer le statut'));
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        alert('Erreur lors du changement de statut');
+    }
+}
+</script>
+
+<!-- Modal Changer Statut -->
+<div class="modal fade" id="modalChangerStatut" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-person-gear me-2"></i>Changer le statut du client</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="list-group" id="statutOptions">
+                    <button type="button" class="list-group-item list-group-item-action d-flex align-items-center gap-2" data-statut="PROSPECT">
+                        <i class="bi bi-person-plus text-warning"></i>
+                        <span>Prospect</span>
+                    </button>
+                    <button type="button" class="list-group-item list-group-item-action d-flex align-items-center gap-2" data-statut="CLIENT">
+                        <i class="bi bi-person-check text-success"></i>
+                        <span>Client</span>
+                    </button>
+                    <button type="button" class="list-group-item list-group-item-action d-flex align-items-center gap-2" data-statut="APPRENANT">
+                        <i class="bi bi-mortarboard text-info"></i>
+                        <span>Apprenant</span>
+                    </button>
+                    <button type="button" class="list-group-item list-group-item-action d-flex align-items-center gap-2" data-statut="HOTE">
+                        <i class="bi bi-house-door text-primary"></i>
+                        <span>Hôte</span>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let clientIdSelection = null;
+document.addEventListener('click', function(e){
+    const trigger = e.target.closest('[data-bs-target="#modalChangerStatut"]');
+    if (trigger) {
+        clientIdSelection = parseInt(trigger.getAttribute('data-client-id'), 10);
+        const current = trigger.getAttribute('data-client-statut');
+        // Highlight current selection
+        document.querySelectorAll('#statutOptions .list-group-item').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-statut') === current);
+        });
+    }
+});
+
+document.querySelectorAll('#statutOptions .list-group-item').forEach(btn => {
+    btn.addEventListener('click', function(){
+        const statut = this.getAttribute('data-statut');
+        if (clientIdSelection) {
+            changerStatutClient(clientIdSelection, statut);
+            const modalEl = document.getElementById('modalChangerStatut');
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.hide();
+        }
+    });
+});
+</script>
 
 <?php include __DIR__ . '/../partials/footer.php'; ?>

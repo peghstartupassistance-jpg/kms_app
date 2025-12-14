@@ -36,24 +36,29 @@ class VerificationVente {
         $problemes = [];
         
         // Vérif 1: Montant livraisons vs Montant vente
-        $tolerance = 100; // 100 FCFA de tolérance
-        if (abs($this->montantLivraisons - $this->montantVente) > $tolerance) {
-            $problemes[] = "Livraisons (" . number_format($this->montantLivraisons, 0, ',', ' ') . ") ≠ Vente (" . number_format($this->montantVente, 0, ',', ' ') . ")";
+        // Ignorer si vente entièrement livrée ET quantités correctes
+        $tolerance = 1000; // 1000 FCFA de tolérance (TVA, arrondis)
+        $venteEntierementLivree = ($this->quantiteLivree >= $this->quantiteCommandee && $this->quantiteCommandee > 0);
+        
+        if (!$venteEntierementLivree && abs($this->montantLivraisons - $this->montantVente) > $tolerance) {
+            $ecart = $this->montantLivraisons - $this->montantVente;
+            $problemes[] = "Montant livraisons (" . number_format($this->montantLivraisons, 0, ',', ' ') . ") ≠ Vente (" . number_format($this->montantVente, 0, ',', ' ') . ") - Écart: " . number_format($ecart, 0, ',', ' ') . " FCFA";
         }
         
-        // Vérif 2: Quantités livrées vs Commandées
-        if ($this->quantiteLivree > $this->quantiteCommandee) {
-            $problemes[] = "Quantités livrées (" . $this->quantiteLivree . ") > Commandées (" . $this->quantiteCommandee . ")";
+        // Vérif 2: Quantités livrées vs Commandées (ne peut pas livrer plus que commandé)
+        if ($this->quantiteLivree > $this->quantiteCommandee && $this->quantiteCommandee > 0) {
+            $problemes[] = "Quantités livrées (" . $this->quantiteLivree . ") > Commandées (" . $this->quantiteCommandee . ") - Surlivraison impossible !";
         }
         
         // Vérif 3: Stock sorties vs Quantités livrées
         if ($this->quantiteStockSortie != $this->quantiteLivree) {
-            $problemes[] = "Sorties stock (" . $this->quantiteStockSortie . ") ≠ Livraisons (" . $this->quantiteLivree . ")";
+            $ecart = $this->quantiteStockSortie - $this->quantiteLivree;
+            $problemes[] = "Sorties stock (" . $this->quantiteStockSortie . ") ≠ Livraisons (" . $this->quantiteLivree . ") - Écart: " . $ecart;
         }
         
-        // Vérif 4: Écritures comptables obligatoires
-        if ($this->ecrituresComptables == 0) {
-            $problemes[] = "Aucune écriture comptable détectée";
+        // Vérif 4: Écritures comptables obligatoires (uniquement si montant vente > 0)
+        if ($this->ecrituresComptables == 0 && $this->montantVente > 0) {
+            $problemes[] = "Aucune écriture comptable détectée (vente de " . number_format($this->montantVente, 0, ',', ' ') . " FCFA)";
         }
         
         return empty($problemes) ? true : $problemes;
@@ -75,11 +80,11 @@ foreach ($ventes as $vente) {
     $verif->montantVente = $vente['montant_total_ttc'];
     $verif->quantiteCommandee = $vente['total_quantite_commandee'] ?? 0;
     
-    // Montant livraisons (estimation: somme des quantités livrées × prix de vente produit)
-    $stmt = $pdo->prepare("SELECT SUM(bll.quantite * p.prix_vente) AS total
+    // Montant livraisons (basé sur les prix réels de la vente)
+    $stmt = $pdo->prepare("SELECT SUM(bll.quantite * vl.prix_unitaire) AS total
                            FROM bons_livraison bl
                            JOIN bons_livraison_lignes bll ON bll.bon_livraison_id = bl.id
-                           JOIN produits p ON p.id = bll.produit_id
+                           JOIN ventes_lignes vl ON vl.vente_id = bl.vente_id AND vl.produit_id = bll.produit_id
                            WHERE bl.vente_id = ?");
     $stmt->execute([$vente['id']]);
     $livr = $stmt->fetch();
@@ -94,12 +99,12 @@ foreach ($ventes as $vente) {
     $qliv = $stmt->fetch();
     $verif->quantiteLivree = $qliv['total'] ?? 0;
     
-    // Montant encaissements (journal de caisse minimal: utiliser source_type/source_id ou commentaire)
+    // Montant encaissements (unified to journal_caisse)
     $stmt = $pdo->prepare("SELECT SUM(montant) as total 
-                           FROM caisse_journal 
-                           WHERE (source_type = 'VENTE' AND source_id = ?) 
-                              OR (commentaire LIKE ?)");
-    $stmt->execute([$vente['id'], '%V' . str_pad($vente['id'], 6, '0', STR_PAD_LEFT) . '%']);
+                           FROM journal_caisse 
+                           WHERE (vente_id = ? AND sens = 'RECETTE' AND est_annule = 0) 
+                              OR (source_type = 'VENTE' AND source_id = ?)");
+    $stmt->execute([$vente['id'], $vente['id']]);
     $enc = $stmt->fetch();
     $verif->montantEncaissements = $enc['total'] ?? 0;
     
@@ -238,15 +243,27 @@ include __DIR__ . '/../partials/sidebar.php';
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#details-<?= $ana->venteId ?>" title="Détails">
-                                    <i class="bi bi-chevron-right"></i>
-                                </button>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button class="btn btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#details-<?= $ana->venteId ?>" title="Détails">
+                                        <i class="bi bi-chevron-down"></i>
+                                    </button>
+                                    <?php if ($hasError): ?>
+                                    <a href="<?= url_for('coordination/corriger_synchronisation.php?vente_id=' . $ana->venteId) ?>" 
+                                       class="btn btn-outline-warning" title="Corriger">
+                                        <i class="bi bi-wrench"></i>
+                                    </a>
+                                    <?php endif; ?>
+                                    <a href="<?= url_for('ventes/detail.php?id=' . $ana->venteId) ?>" 
+                                       class="btn btn-outline-secondary" title="Voir vente">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
-                        <?php if ($hasError): ?>
-                            <tr class="collapse" id="details-<?= $ana->venteId ?>">
-                                <td colspan="11">
-                                    <div class="alert alert-danger mb-0">
+                        <tr class="collapse" id="details-<?= $ana->venteId ?>">
+                            <td colspan="11">
+                                <?php if ($hasError): ?>
+                                    <div class="alert alert-danger mb-2">
                                         <strong>Problèmes détectés :</strong>
                                         <ul class="mb-0 mt-2">
                                             <?php foreach ($problemes as $p): ?>
@@ -254,9 +271,48 @@ include __DIR__ . '/../partials/sidebar.php';
                                             <?php endforeach; ?>
                                         </ul>
                                     </div>
-                                </td>
-                            </tr>
-                        <?php endif; ?>
+                                <?php endif; ?>
+                                
+                                <!-- Détails complets de vérification -->
+                                <div class="card border-info">
+                                    <div class="card-body p-2">
+                                        <h6 class="mb-2"><i class="bi bi-bar-chart"></i> Détails de synchronisation</h6>
+                                        <div class="row g-2 small">
+                                            <div class="col-md-3">
+                                                <strong>Montants :</strong><br>
+                                                Vente : <?= number_format($ana->montantVente, 0, ',', ' ') ?> FCFA<br>
+                                                Livraisons : <?= number_format($ana->montantLivraisons, 0, ',', ' ') ?> FCFA<br>
+                                                Encaissements : <?= number_format($ana->montantEncaissements, 0, ',', ' ') ?> FCFA
+                                            </div>
+                                            <div class="col-md-3">
+                                                <strong>Quantités :</strong><br>
+                                                Commandée : <?= (int)$ana->quantiteCommandee ?><br>
+                                                Livrée : <?= (int)$ana->quantiteLivree ?><br>
+                                                Stock sortie : <?= (int)$ana->quantiteStockSortie ?>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <strong>Comptabilité :</strong><br>
+                                                Écritures : <?= $ana->ecrituresComptables ?><br>
+                                                <?php if ($ana->ecrituresComptables > 0): ?>
+                                                    <span class="badge bg-success">OK</span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-danger">Manquant</span>
+                                                <?php endif; ?>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <strong>État :</strong><br>
+                                                <?php 
+                                                $venteEntierementLivree = ($ana->quantiteLivree >= $ana->quantiteCommandee && $ana->quantiteCommandee > 0);
+                                                $stockCoherent = ($ana->quantiteStockSortie == $ana->quantiteLivree);
+                                                ?>
+                                                Entièrement livrée : <?= $venteEntierementLivree ? '✅ Oui' : '❌ Non' ?><br>
+                                                Stock cohérent : <?= $stockCoherent ? '✅ Oui' : '❌ Non' ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
@@ -265,12 +321,13 @@ include __DIR__ . '/../partials/sidebar.php';
 
     <!-- Instructions -->
     <div class="alert alert-info mt-4">
-        <strong><i class="bi bi-info-circle"></i> Comment utiliser ce rapport :</strong>
+        <strong><i class="bi bi-info-circle"></i> Guide de correction :</strong>
         <ul class="mb-0 mt-2">
-            <li><strong>Status OK :</strong> La vente est complètement synchronisée</li>
-            <li><strong>Status ERREUR :</strong> Il existe une incohérence - cliquez sur <i class="bi bi-chevron-right"></i> pour voir les détails</li>
-            <li>Cliquez sur le numéro de vente pour voir la vue 360° complète</li>
-            <li>Vérifiez que les quantités commandées = livrées = sorties du stock</li>
+            <li><strong>🟢 Status OK :</strong> La vente est complètement synchronisée</li>
+            <li><strong>🔴 Status ERREUR :</strong> Il existe une incohérence - Cliquez sur l'icône <i class="bi bi-wrench text-warning"></i> pour corriger</li>
+            <li><i class="bi bi-chevron-down"></i> = voir les détails des problèmes</li>
+            <li><i class="bi bi-wrench text-warning"></i> = lancer le workflow de correction automatique</li>
+            <li><i class="bi bi-eye"></i> = voir la vente complète</li>
         </ul>
     </div>
 </div>

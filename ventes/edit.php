@@ -162,6 +162,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (empty($errors)) {
             try {
+                $pdo->beginTransaction();
+
                 $utilisateur = utilisateurConnecte();
                 $utilisateurId = $utilisateur['id'] ?? null;
 
@@ -215,30 +217,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // 🔗 Synchronisation stock (sorties liées à cette vente)
                     stock_synchroniser_vente($pdo, $id);
 
-                    // Enregistrer écriture en caisse (entrée de trésorerie pour vente)
-                    try {
-                        caisse_enregistrer_ecriture(
-                            $pdo,
-                            'ENTREE',
-                            (float)$totalTTC,
-                            'VENTE',
-                            $id,
-                            'Vente ' . ($data['numero'] ?? ''),
-                            $utilisateurId ?? null
-                        );
-                    } catch (Throwable $e) {
-                        // Ne pas empêcher l'enregistrement de la vente si l'écriture caisse échoue.
-                    }
-
-                    // Génération automatique des écritures comptables si statut LIVREE
-                    if ($data['statut'] === 'LIVREE') {
-                        require_once __DIR__ . '/../lib/compta.php';
-                        try {
-                            compta_creer_ecritures_vente($pdo, $id);
-                        } catch (Throwable $e) {
-                            error_log('Erreur génération écritures comptables vente: ' . $e->getMessage());
-                        }
-                    }
+                    // PAS de nouvelle écriture caisse/compta en édition pour éviter les doublons
 
                     $_SESSION['flash_success'] = "Vente mise à jour avec succès.";
 
@@ -292,7 +271,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // 🔗 Synchronisation stock (sorties liées à cette vente)
                     stock_synchroniser_vente($pdo, $venteId);
 
-                    // Enregistrer écriture en caisse (entrée de trésorerie pour vente)
+                    // Enregistrer écriture en caisse (entrée de trésorerie pour vente) - créé uniquement à la création
                     try {
                         caisse_enregistrer_ecriture(
                             $pdo,
@@ -301,7 +280,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             'VENTE',
                             $venteId,
                             'Vente ' . ($numero ?? ''),
-                            $utilisateurId ?? null
+                            $utilisateurId ?? null,
+                            $data['date_vente'] ?? null,
+                            $numero
                         );
                     } catch (Throwable $e) {
                         // Ne pas empêcher l'enregistrement de la vente si l'écriture caisse échoue.

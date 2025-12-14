@@ -239,21 +239,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // 🔗 Synchronisation stock (entrées liées à cet achat)
             stock_synchroniser_achat($pdo, $achatId);
 
-            // Enregistrer écriture en caisse (sortie de trésorerie pour achat)
-            // Sens = 'SORTIE' car c'est un paiement / dépense
-            try {
-                caisse_enregistrer_ecriture(
-                    $pdo,
-                    'SORTIE',
-                    (float)$montant_total_ttc,
-                    'ACHAT',
-                    $achatId,
-                    'Achat ' . $data['numero'],
-                    $userId ?: null
-                );
-            } catch (Throwable $e) {
-                // Ne pas bloquer l'enregistrement d'achat si l'écriture caisse échoue,
-                // mais loguer l'erreur si nécessaire.
+            // Écriture caisse : uniquement en création pour éviter les doublons en édition
+            if (!$isEdit) {
+                try {
+                    caisse_enregistrer_ecriture(
+                        $pdo,
+                        'SORTIE',
+                        (float)$montant_total_ttc,
+                        'ACHAT',
+                        $achatId,
+                        'Achat ' . $data['numero'],
+                        $userId ?: null,
+                        $data['date_achat'] ?? null,
+                        $data['numero'] ?? null,
+                        1,
+                        'ACHAT'
+                    );
+                } catch (Throwable $e) {
+                    // Ne pas bloquer l'enregistrement d'achat si l'écriture caisse échoue.
+                }
             }
 
             $pdo->commit();

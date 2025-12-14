@@ -37,8 +37,12 @@ function is_active($page, $dir = null): bool {
 
         <!-- COMMERCIAL -->
         <?php if (peut('VENTES_LIRE') || peut('CLIENTS_LIRE') || peut('DEVIS_LIRE')): ?>
-            <div class="sidebar-section">
-                <div class="sidebar-section-title">Commercial</div>
+            <div class="sidebar-section" data-section-key="commercial">
+                <div class="sidebar-section-title button" role="button" tabindex="0">
+                    <span>Commercial</span>
+                    <i class="bi bi-chevron-down chevron"></i>
+                </div>
+                <div class="section-content">
                 <?php if (peut('VENTES_LIRE')): ?>
                     <a href="<?= url_for('commercial/dashboard.php') ?>" class="sidebar-item <?= is_active('dashboard.php', 'commercial') ? 'active' : '' ?>">
                         <i class="bi bi-speedometer2"></i>
@@ -67,13 +71,18 @@ function is_active($page, $dir = null): bool {
                         <span>Bons de livraison</span>
                     </a>
                 <?php endif; ?>
+                </div>
             </div>
         <?php endif; ?>
 
         <!-- CANAUX ACQUISITION -->
         <?php if (peut('CLIENTS_LIRE')): ?>
-            <div class="sidebar-section">
-                <div class="sidebar-section-title">Canaux acquisition</div>
+            <div class="sidebar-section" data-section-key="acquisition">
+                <div class="sidebar-section-title button" role="button" tabindex="0">
+                    <span>Canaux acquisition</span>
+                    <i class="bi bi-chevron-down chevron"></i>
+                </div>
+                <div class="section-content">
                 <a href="<?= url_for('showroom/visiteurs_list.php') ?>" class="sidebar-item <?= is_active('visiteurs_list.php', 'showroom') ? 'active' : '' ?>">
                     <i class="bi bi-shop-window"></i>
                     <span>Showroom</span>
@@ -86,13 +95,18 @@ function is_active($page, $dir = null): bool {
                     <i class="bi bi-megaphone"></i>
                     <span>Digital</span>
                 </a>
+                </div>
             </div>
         <?php endif; ?>
 
         <!-- PRODUITS & STOCK -->
         <?php if (peut('PRODUITS_LIRE') || peut('ACHATS_GERER') || peut('STOCK_LIRE')): ?>
-            <div class="sidebar-section">
-                <div class="sidebar-section-title">Produits & Stock</div>
+            <div class="sidebar-section" data-section-key="produits-stock">
+                <div class="sidebar-section-title button" role="button" tabindex="0">
+                    <span>Produits & Stock</span>
+                    <i class="bi bi-chevron-down chevron"></i>
+                </div>
+                <div class="section-content">
                 <?php if (peut('PRODUITS_LIRE')): ?>
                     <a href="<?= url_for('catalogue/index.php') ?>" class="sidebar-item <?= is_active('index.php', 'catalogue') ? 'active' : '' ?>">
                         <i class="bi bi-diagram-3"></i>
@@ -119,13 +133,18 @@ function is_active($page, $dir = null): bool {
                         <span>Ajustement stock</span>
                     </a>
                 <?php endif; ?>
+                </div>
             </div>
         <?php endif; ?>
         
         <!-- COORDINATION VENTES-LIVRAISONS -->
         <?php if (peut('VENTES_LIRE')): ?>
-            <div class="sidebar-section">
-                <div class="sidebar-section-title">Coordination</div>
+            <div class="sidebar-section" data-section-key="coordination">
+                <div class="sidebar-section-title button" role="button" tabindex="0">
+                    <span>Coordination</span>
+                    <i class="bi bi-chevron-down chevron"></i>
+                </div>
+                <div class="section-content">
                 <a href="<?= url_for('coordination/dashboard.php') ?>" class="sidebar-item <?= is_active('dashboard.php', 'coordination') ? 'active' : '' ?>">
                     <i class="bi bi-diagram-3-fill"></i>
                     <span>Dashboard coordination</span>
@@ -144,13 +163,18 @@ function is_active($page, $dir = null): bool {
                         <span>Ruptures signalées</span>
                     </a>
                 <?php endif; ?>
+                </div>
             </div>
         <?php endif; ?>
 
         <!-- FINANCE -->
         <?php if (peut('CAISSE_LIRE') || peut('COMPTABILITE_LIRE')): ?>
-            <div class="sidebar-section">
-                <div class="sidebar-section-title">Finance</div>
+            <div class="sidebar-section" data-section-key="finance">
+                <div class="sidebar-section-title button" role="button" tabindex="0">
+                    <span>Finance</span>
+                    <i class="bi bi-chevron-down chevron"></i>
+                </div>
+                <div class="section-content">
                 <?php if (peut('CAISSE_LIRE')): ?>
                     <a href="<?= url_for('caisse/journal.php') ?>" class="sidebar-item <?= is_active('journal.php', 'caisse') ? 'active' : '' ?>">
                         <i class="bi bi-cash-coin"></i>
@@ -170,14 +194,23 @@ function is_active($page, $dir = null): bool {
                         <i class="bi bi-graph-up"></i>
                         <span>Balance & Bilan</span>
                     </a>
+                    <a href="<?= url_for('compta/valider_corrections.php') ?>" class="sidebar-item sidebar-item-nested <?= is_active('valider_corrections.php', 'compta') ? 'active' : '' ?>">
+                        <i class="bi bi-pencil-square text-warning"></i>
+                        <span>Corrections en attente</span>
+                    </a>
                 <?php endif; ?>
+                </div>
             </div>
         <?php endif; ?>
 
         <!-- SERVICES ANNEXES -->
         <?php if (peut('HOTEL_GERER') || peut('FORMATION_GERER')): ?>
-            <div class="sidebar-section">
-                <div class="sidebar-section-title">Services annexes</div>
+            <div class="sidebar-section" data-section-key="services">
+                <div class="sidebar-section-title button" role="button" tabindex="0">
+                    <span>Services annexes</span>
+                    <i class="bi bi-chevron-down chevron"></i>
+                </div>
+                <div class="section-content">
                 <?php if (peut('HOTEL_GERER')): ?>
                     <a href="<?= url_for('hotel/reservations.php') ?>" class="sidebar-item <?= is_active('reservations.php', 'hotel') ? 'active' : '' ?>">
                         <i class="bi bi-building"></i>
@@ -190,13 +223,24 @@ function is_active($page, $dir = null): bool {
                         <span>Formation</span>
                     </a>
                 <?php endif; ?>
+                </div>
             </div>
         <?php endif; ?>
 
         <!-- MARKETING -->
         <?php if (peut('PROMOTIONS_GERER') || peut('SATISFACTION_GERER') || peut('REPORTING_LIRE')): ?>
-            <div class="sidebar-section">
-                <div class="sidebar-section-title">Marketing & Analyse</div>
+            <div class="sidebar-section" data-section-key="marketing">
+                <div class="sidebar-section-title button" role="button" tabindex="0">
+                    <span>Marketing & Analyse</span>
+                    <i class="bi bi-chevron-down chevron"></i>
+                </div>
+                <div class="section-content">
+                <?php if (peut('REPORTING_LIRE')): ?>
+                    <a href="<?= url_for('reporting/tunnel_conversion.php') ?>" class="sidebar-item <?= is_active('tunnel_conversion.php', 'reporting') ? 'active' : '' ?>">
+                        <i class="bi bi-funnel"></i>
+                        <span>Tunnel de conversion</span>
+                    </a>
+                <?php endif; ?>
                 <?php if (peut('PROMOTIONS_GERER')): ?>
                     <a href="<?= url_for('promotions/list.php') ?>" class="sidebar-item <?= is_active('list.php', 'promotions') ? 'active' : '' ?>">
                         <i class="bi bi-megaphone"></i>
@@ -209,17 +253,23 @@ function is_active($page, $dir = null): bool {
                         <span>Dashboard Marketing</span>
                     </a>
                 <?php endif; ?>
+                </div>
             </div>
         <?php endif; ?>
 
         <!-- ADMINISTRATION -->
         <?php if (peut('UTILISATEURS_GERER')): ?>
-            <div class="sidebar-section">
-                <div class="sidebar-section-title">Administration</div>
+            <div class="sidebar-section" data-section-key="admin">
+                <div class="sidebar-section-title button" role="button" tabindex="0">
+                    <span>Administration</span>
+                    <i class="bi bi-chevron-down chevron"></i>
+                </div>
+                <div class="section-content">
                 <a href="<?= url_for('utilisateurs/list.php') ?>" class="sidebar-item <?= is_active('list.php', 'utilisateurs') ? 'active' : '' ?>">
                     <i class="bi bi-people-gear"></i>
                     <span>Utilisateurs</span>
                 </a>
+                </div>
             </div>
         <?php endif; ?>
 

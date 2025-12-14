@@ -219,33 +219,19 @@ include __DIR__ . '/../partials/sidebar.php';
                                     <?= number_format((float)$d['montant_total_ht'], 0, ',', ' ') ?> FCFA
                                 </td>
                                 <td class="text-center">
-                                    <?php
-                                    $badgeClass = 'badge-status-secondary';
-                                    $badgeIcon = 'bi-hourglass';
-                                    if ($d['statut'] === 'EN_ATTENTE') {
-                                        $badgeClass = 'badge-status-warning';
-                                        $badgeIcon = 'bi-hourglass-split';
-                                    } elseif ($d['statut'] === 'ACCEPTE') {
-                                        $badgeClass = 'badge-status-success';
-                                        $badgeIcon = 'bi-check-circle-fill';
-                                    } elseif ($d['statut'] === 'REFUSE') {
-                                        $badgeClass = 'badge-status-danger';
-                                        $badgeIcon = 'bi-x-circle-fill';
-                                    } elseif ($d['statut'] === 'ANNULE') {
-                                        $badgeClass = 'badge-status-secondary';
-                                        $badgeIcon = 'bi-slash-circle';
-                                    }
-
-                                    $libelleStatut = $d['statut'];
-                                    if ($d['statut'] === 'ACCEPTE' && !empty($d['est_converti'])) {
-                                        $libelleStatut = 'CONVERTI';
-                                        $badgeIcon = 'bi-cart-check-fill';
-                                    }
-                                    ?>
-                                    <span class="modern-badge <?= $badgeClass ?>">
-                                        <i class="<?= $badgeIcon ?>"></i>
-                                        <?= htmlspecialchars($libelleStatut) ?>
-                                    </span>
+                                    <?php if ($d['est_converti']): ?>
+                                        <span class="modern-badge badge-status-success">
+                                            <i class="bi bi-cart-check-fill"></i>
+                                            CONVERTI
+                                        </span>
+                                    <?php else: ?>
+                                        <div data-statut-change 
+                                             data-entite="devis" 
+                                             data-id="<?= (int)$d['id'] ?>" 
+                                             data-statut="<?= htmlspecialchars($d['statut']) ?>">
+                                            <!-- Sera transformé en dropdown par tunnel-conversion.js -->
+                                        </div>
+                                    <?php endif; ?>
                                 </td>
                                 <td class="text-end">
                                     <div class="action-btn-group">

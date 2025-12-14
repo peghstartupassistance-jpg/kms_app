@@ -264,6 +264,18 @@ include __DIR__ . '/../partials/sidebar.php';
                                            title="Imprimer facture">
                                             <i class="bi bi-printer"></i>
                                         </a>
+                                        <?php if ($peutCreerVente && in_array($v['statut'], ['EN_ATTENTE_LIVRAISON', 'PARTIELLEMENT_LIVREE'], true)): ?>
+                                            <a href="<?= url_for('coordination/ordres_preparation_edit.php?vente_id=' . (int)$v['id']) ?>"
+                                               class="btn btn-sm btn-outline-warning btn-action"
+                                               title="Créer ordre de préparation">
+                                                <i class="bi bi-clipboard-check"></i>
+                                            </a>
+                                            <a href="<?= url_for('livraisons/create.php') . '?vente_id=' . (int)$v['id'] ?>"
+                                               class="btn btn-sm btn-outline-success btn-action"
+                                               title="Créer bon de livraison">
+                                                <i class="bi bi-truck"></i>
+                                            </a>
+                                        <?php endif; ?>
                                         <?php if ($peutCreerVente): ?>
                                             <a href="<?= url_for('ventes/edit.php') . '?id=' . (int)$v['id'] ?>"
                                                class="btn btn-sm btn-outline-secondary btn-action"

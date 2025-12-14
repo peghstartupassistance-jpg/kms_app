@@ -1,72 +1,147 @@
 <?php
-// lib/caisse.php
-/**
- * Petite librairie de journal de caisse minimaliste.
- * La table `caisse_journal` est créée si elle n'existe pas.
- *
- * champs:
- *  - id INT PK
- *  - date_ecriture DATETIME
- *  - sens ENUM('ENTREE','SORTIE')
- *  - montant DECIMAL(15,2)
- *  - source_type VARCHAR(50)
- *  - source_id INT NULL
- *  - commentaire TEXT
- *  - utilisateur_id INT NULL
- */
+// lib/caisse.php – caisse unifiée sur journal_caisse
 
-function caisse_ensure_table(PDO $pdo): void
+// Normalise le sens (ENTREE/SORTIE → RECETTE/DEPENSE)
+function caisse_normaliser_sens(string $sens): string
 {
-    $sql = "CREATE TABLE IF NOT EXISTS caisse_journal (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        date_ecriture DATETIME NOT NULL,
-        sens ENUM('ENTREE','SORTIE') NOT NULL,
-        montant DECIMAL(15,2) NOT NULL,
-        source_type VARCHAR(50) DEFAULT NULL,
-        source_id INT DEFAULT NULL,
-        commentaire TEXT DEFAULT NULL,
-        utilisateur_id INT DEFAULT NULL
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
-    $pdo->exec($sql);
+	$s = strtoupper(trim($sens));
+	if ($s === 'ENTREE') {
+		return 'RECETTE';
+	}
+	if ($s === 'SORTIE') {
+		return 'DEPENSE';
+	}
+	if (!in_array($s, ['RECETTE', 'DEPENSE'], true)) {
+		throw new InvalidArgumentException('Sens invalide (attendu ENTREE/SORTIE/RECETTE/DEPENSE)');
+	}
+	return $s;
 }
 
 /**
- * Enregistre une écriture dans la caisse.
- * sens: 'ENTREE' pour encaissement, 'SORTIE' pour décaissement.
+ * Enregistre une écriture dans journal_caisse (source de vérité unique).
+ * Paramètres additionnels optionnels pour coller au schéma existant.
  */
-function caisse_enregistrer_ecriture(PDO $pdo, string $sens, float $montant, string $source_type = null, ?int $source_id = null, ?string $commentaire = null, ?int $utilisateur_id = null, ?string $date = null): int
-{
-    if (!in_array($sens, ['ENTREE', 'SORTIE'], true)) {
-        throw new InvalidArgumentException('Sens invalide pour écriture caisse');
-    }
+function caisse_enregistrer_ecriture(
+	PDO $pdo,
+	string $sens,
+	float $montant,
+	?string $source_type = null,
+	?int $source_id = null,
+	?string $commentaire = null,
+	?int $utilisateur_id = null,
+	?string $date_operation = null,
+	?string $numero_piece = null,
+	?int $mode_paiement_id = 1,
+	?string $type_operation = null,
+	?int $vente_id = null,
+	?int $reservation_id = null,
+	?int $inscription_formation_id = null,
+	?int $client_id = null,
+	?int $fournisseur_id = null
+): int {
+	$sensNorm = caisse_normaliser_sens($sens);
 
-    caisse_ensure_table($pdo);
+	$dateOp = $date_operation ?: date('Y-m-d');
+	$numero = $numero_piece ?: 'CAISSE-' . date('Ymd-His') . '-' . random_int(100, 999);
+	$typeOp = $type_operation ?: ($source_type ? strtoupper($source_type) : ($sensNorm === 'RECETTE' ? 'VENTE' : 'AUTRE'));
 
-    $sql = "INSERT INTO caisse_journal (date_ecriture, sens, montant, source_type, source_id, commentaire, utilisateur_id)
-            VALUES (:date_ecriture, :sens, :montant, :source_type, :source_id, :commentaire, :utilisateur_id)";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([
-        ':date_ecriture' => $date ?? date('Y-m-d H:i:s'),
-        ':sens' => $sens,
-        ':montant' => $montant,
-        ':source_type' => $source_type,
-        ':source_id' => $source_id,
-        ':commentaire' => $commentaire,
-        ':utilisateur_id' => $utilisateur_id,
-    ]);
+	// Valeurs obligatoires du schéma
+	$modePaiementId = $mode_paiement_id ?: 1;
+	$responsableId = $utilisateur_id ?: 1;
 
-    return (int)$pdo->lastInsertId();
+	$sql = "
+		INSERT INTO journal_caisse (
+			date_operation,
+			numero_piece,
+			nature_operation,
+			client_id,
+			fournisseur_id,
+			sens,
+			montant,
+			mode_paiement_id,
+			vente_id,
+			reservation_id,
+			inscription_formation_id,
+			responsable_encaissement_id,
+			observations,
+			est_annule,
+			type_operation,
+			date_annulation,
+			annule_par_id
+		) VALUES (
+			:date_operation,
+			:numero_piece,
+			:nature_operation,
+			:client_id,
+			:fournisseur_id,
+			:sens,
+			:montant,
+			:mode_paiement_id,
+			:vente_id,
+			:reservation_id,
+			:inscription_formation_id,
+			:responsable_encaissement_id,
+			:observations,
+			0,
+			:type_operation,
+			NULL,
+			NULL
+		)
+	";
+
+	$stmt = $pdo->prepare($sql);
+	$stmt->execute([
+		':date_operation' => $dateOp,
+		':numero_piece' => $numero,
+		':nature_operation' => $commentaire,
+		':client_id' => $client_id,
+		':fournisseur_id' => $fournisseur_id,
+		':sens' => $sensNorm,
+		':montant' => $montant,
+		':mode_paiement_id' => $modePaiementId,
+		':vente_id' => $vente_id,
+		':reservation_id' => $reservation_id,
+		':inscription_formation_id' => $inscription_formation_id,
+		':responsable_encaissement_id' => $responsableId,
+		':observations' => $commentaire,
+		':type_operation' => $typeOp,
+	]);
+
+	return (int)$pdo->lastInsertId();
 }
 
-/**
- * Récupère les écritures récentes (utile pour tests)
- */
+function caisse_annuler_ecriture(PDO $pdo, int $id, ?int $annule_par_id = null): bool
+{
+	$stmt = $pdo->prepare("UPDATE journal_caisse SET est_annule = 1, date_annulation = NOW(), annule_par_id = :annule_par_id WHERE id = :id");
+	return $stmt->execute([
+		':annule_par_id' => $annule_par_id,
+		':id' => $id,
+	]);
+}
+
+function caisse_get_solde(PDO $pdo, ?string $date_debut = null, ?string $date_fin = null): float
+{
+	$sql = "SELECT COALESCE(SUM(CASE WHEN sens = 'RECETTE' THEN montant ELSE -montant END), 0) AS solde FROM journal_caisse WHERE est_annule = 0";
+	$params = [];
+	if ($date_debut) {
+		$sql .= " AND date_operation >= :date_debut";
+		$params[':date_debut'] = $date_debut;
+	}
+	if ($date_fin) {
+		$sql .= " AND date_operation <= :date_fin";
+		$params[':date_fin'] = $date_fin;
+	}
+	$stmt = $pdo->prepare($sql);
+	$stmt->execute($params);
+	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+	return (float)($row['solde'] ?? 0);
+}
+
 function caisse_get_recent(PDO $pdo, int $limit = 50): array
 {
-    $stmt = $pdo->prepare('SELECT * FROM caisse_journal ORDER BY id DESC LIMIT :l');
-    $stmt->bindValue(':l', $limit, PDO::PARAM_INT);
-    $stmt->execute();
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+	$stmt = $pdo->prepare('SELECT * FROM journal_caisse ORDER BY id DESC LIMIT :l');
+	$stmt->bindValue(':l', $limit, PDO::PARAM_INT);
+	$stmt->execute();
+	return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-?>

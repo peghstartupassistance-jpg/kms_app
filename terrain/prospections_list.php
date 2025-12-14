@@ -669,7 +669,12 @@ textarea.form-control {
                             <div class="prospect-field">
                                 <div class="field-label"><i class="bi bi-clipboard-data me-1"></i> Résultat</div>
                                 <div class="field-value">
-                                    <span class="result-badge bg-info"><?= htmlspecialchars($p['resultat']) ?></span>
+                                    <div data-statut-change 
+                                         data-entite="prospection" 
+                                         data-id="<?= (int)$p['id'] ?>" 
+                                         data-statut="<?= htmlspecialchars($p['resultat']) ?>">
+                                        <!-- Sera transformé en dropdown par tunnel-conversion.js -->
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -31,6 +31,19 @@ if (!$vente) {
     exit;
 }
 
+// Vérifier que la vente peut encore être livrée
+if ($vente['statut'] === 'LIVREE') {
+    $_SESSION['flash_error'] = "Cette vente est déjà entièrement livrée. Impossible de créer un nouveau bon de livraison.";
+    header('Location: ' . url_for('ventes/detail.php?id=' . (int)$vente_id));
+    exit;
+}
+
+if ($vente['statut'] === 'ANNULEE') {
+    $_SESSION['flash_error'] = "Cette vente est annulée. Impossible de créer un bon de livraison.";
+    header('Location: ' . url_for('ventes/detail.php?id=' . (int)$vente_id));
+    exit;
+}
+
 // Charger les lignes de la vente
 $stmt = $pdo->prepare("
     SELECT vl.*, p.designation, p.code_produit, p.stock_actuel
@@ -216,11 +229,31 @@ include __DIR__ . '/../partials/sidebar.php';
 
     <!-- Infos vente -->
     <div class="row g-3 mb-3">
+        <?php if ($ordre): ?>
+        <div class="col-12">
+            <div class="alert alert-success d-flex align-items-center">
+                <i class="bi bi-clipboard-check fs-4 me-3"></i>
+                <div>
+                    <strong>Ordre de préparation :</strong> 
+                    <a href="<?= url_for('coordination/ordres_preparation_edit.php?id=' . (int)$ordre['id']) ?>" class="alert-link">
+                        <?= htmlspecialchars($ordre['numero_ordre']) ?>
+                    </a>
+                    <span class="badge bg-success ms-2"><?= htmlspecialchars($ordre['statut']) ?></span>
+                    <br>
+                    <small class="text-muted">Ce bon de livraison est créé depuis cet ordre de préparation</small>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
         <div class="col-md-3">
             <div class="card">
                 <div class="card-body">
                     <small class="text-muted">Vente</small>
-                    <div class="fw-bold"><?= htmlspecialchars($vente['numero']) ?></div>
+                    <div class="fw-bold">
+                        <a href="<?= url_for('ventes/detail.php?id=' . (int)$vente_id) ?>">
+                            <?= htmlspecialchars($vente['numero']) ?>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -251,7 +284,7 @@ include __DIR__ . '/../partials/sidebar.php';
     </div>
 
     <form method="post">
-        <?= csrf_champ() ?>
+        <input type="hidden" name="csrf_token" value="<?= getCsrfToken() ?>">
         
         <div class="card mb-3">
             <div class="card-header">

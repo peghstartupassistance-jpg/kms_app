@@ -27,22 +27,65 @@ $stmt = $pdo->prepare("SELECT COUNT(*) as total FROM ventes WHERE DATE(date_vent
 $stmt->execute();
 $ventes_jour = $stmt->fetch()['total'] ?? 0;
 
-// CA du jour
-$stmt = $pdo->prepare("
-    SELECT 
-        SUM(CASE WHEN source_type = 'vente' THEN montant ELSE 0 END) as ca_ventes,
-        SUM(CASE WHEN source_type = 'reservation_hotel' THEN montant ELSE 0 END) as ca_hotel,
-        SUM(CASE WHEN source_type = 'inscription_formation' THEN montant ELSE 0 END) as ca_formation,
-        SUM(montant) as ca_total
-    FROM caisse_journal 
-    WHERE DATE(date_ecriture) = CURDATE() AND sens = 'ENTREE'
-");
-$stmt->execute();
-$ca_data = $stmt->fetch();
-$ca_jour = $ca_data['ca_total'] ?? 0;
-$ca_ventes = $ca_data['ca_ventes'] ?? 0;
-$ca_hotel = $ca_data['ca_hotel'] ?? 0;
-$ca_formation = $ca_data['ca_formation'] ?? 0;
+// CA du jour (compatible avec journal_caisse ET caisse_journal)
+$ca_jour = 0;
+$ca_ventes = 0;
+$ca_hotel = 0;
+$ca_formation = 0;
+
+// DEBUG: Vérifier les données brutes
+error_log('[INDEX DEBUG] === CA DU JOUR ===');
+
+try {
+    // Vérifier ce qui existe dans journal_caisse
+    $debug_stmt = $pdo->prepare('SELECT COUNT(*) as cnt FROM journal_caisse WHERE DATE(date_operation) = CURDATE()');
+    $debug_stmt->execute();
+    $debug_count = $debug_stmt->fetch()['cnt'];
+    error_log('[INDEX DEBUG] Lignes journal_caisse aujourd\'hui: ' . $debug_count);
+    
+    if ($debug_count > 0) {
+        $debug_stmt2 = $pdo->prepare('SELECT * FROM journal_caisse WHERE DATE(date_operation) = CURDATE()');
+        $debug_stmt2->execute();
+        $debug_rows = $debug_stmt2->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($debug_rows as $row) {
+            error_log('[INDEX DEBUG] Ligne: id=' . $row['id'] . ' sens=' . $row['sens'] . ' montant=' . $row['montant'] . ' annulée=' . $row['est_annule']);
+        }
+    }
+} catch (Exception $e) {
+    error_log('[INDEX DEBUG] Erreur debug: ' . $e->getMessage());
+}
+
+try {
+    // Essayer avec journal_caisse d'abord (nouvelle table unifiée)
+    $stmt = $pdo->prepare("
+        SELECT 
+            SUM(CASE WHEN sens IN ('RECETTE', 'ENTREE') THEN montant ELSE 0 END) as ca_total
+        FROM journal_caisse 
+        WHERE DATE(date_operation) = CURDATE() AND est_annule = 0
+    ");
+    $stmt->execute();
+    $ca_data = $stmt->fetch();
+    $ca_jour = (float)($ca_data['ca_total'] ?? 0);
+    error_log('[INDEX DEBUG] Résultat journal_caisse: ' . $ca_jour);
+} catch (Exception $e) {
+    error_log('[INDEX DEBUG] Erreur journal_caisse: ' . $e->getMessage());
+    // Fallback sur caisse_journal (ancienne table)
+    try {
+        $stmt = $pdo->prepare("
+            SELECT 
+                SUM(CASE WHEN sens IN ('ENTREE', 'SORTIE') THEN montant ELSE 0 END) as ca_total
+            FROM caisse_journal 
+            WHERE DATE(date_ecriture) = CURDATE()
+        ");
+        $stmt->execute();
+        $ca_data = $stmt->fetch();
+        $ca_jour = (float)($ca_data['ca_total'] ?? 0);
+        error_log('[INDEX DEBUG] Résultat caisse_journal: ' . $ca_jour);
+    } catch (Exception $e2) {
+        error_log('[INDEX DEBUG] Erreur caisse_journal: ' . $e2->getMessage());
+        $ca_jour = 0;
+    }
+}
 
 // Taux occupation hôtel
 $stmt = $pdo->prepare("
@@ -95,22 +138,40 @@ $pieces_valider = $stmt->fetch()['total'] ?? 0;
 // STATISTIQUES PÉRIODE (7 JOURS)
 // ═══════════════════════════════════════════════════════════════════════════════
 
-// CA 7 derniers jours
-$stmt = $pdo->prepare("
-    SELECT 
-        SUM(CASE WHEN source_type = 'vente' THEN montant ELSE 0 END) as ca_ventes,
-        SUM(CASE WHEN source_type = 'reservation_hotel' THEN montant ELSE 0 END) as ca_hotel,
-        SUM(CASE WHEN source_type = 'inscription_formation' THEN montant ELSE 0 END) as ca_formation,
-        SUM(montant) as ca_total
-    FROM caisse_journal 
-    WHERE date_ecriture >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) AND sens = 'ENTREE'
-");
-$stmt->execute();
-$ca_7j_data = $stmt->fetch();
-$ca_7j = $ca_7j_data['ca_total'] ?? 0;
-$ca_7j_ventes = $ca_7j_data['ca_ventes'] ?? 0;
-$ca_7j_hotel = $ca_7j_data['ca_hotel'] ?? 0;
-$ca_7j_formation = $ca_7j_data['ca_formation'] ?? 0;
+// CA 7 derniers jours (compatible avec journal_caisse ET caisse_journal)
+$ca_7j = 0;
+$ca_7j_ventes = 0;
+$ca_7j_hotel = 0;
+$ca_7j_formation = 0;
+
+try {
+    // Essayer avec journal_caisse d'abord (nouvelle table unifiée)
+    $stmt = $pdo->prepare("
+        SELECT 
+            SUM(CASE WHEN sens IN ('RECETTE', 'ENTREE') THEN montant ELSE 0 END) as ca_total
+        FROM journal_caisse 
+        WHERE date_operation >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) AND est_annule = 0
+    ");
+    $stmt->execute();
+    $ca_7j_data = $stmt->fetch();
+    $ca_7j = (float)($ca_7j_data['ca_total'] ?? 0);
+} catch (Exception $e) {
+    // Fallback sur caisse_journal (ancienne table)
+    try {
+        $stmt = $pdo->prepare("
+            SELECT 
+                SUM(CASE WHEN sens IN ('ENTREE', 'SORTIE') THEN montant ELSE 0 END) as ca_total
+            FROM caisse_journal 
+            WHERE date_ecriture >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+        ");
+        $stmt->execute();
+        $ca_7j_data = $stmt->fetch();
+        $ca_7j = (float)($ca_7j_data['ca_total'] ?? 0);
+    } catch (Exception $e2) {
+        $ca_7j = 0;
+    }
+}
+$ca_7j_formation = 0; // TODO: Get from inscriptions_formation join after refactor
 
 // Nouveaux clients (7j)
 $stmt = $pdo->prepare("SELECT COUNT(*) as total FROM clients WHERE date_creation >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)");

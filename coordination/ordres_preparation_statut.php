@@ -6,8 +6,17 @@ exigerPermission('VENTES_MODIFIER');
 
 global $pdo;
 
-$id = $_GET['id'] ?? null;
-$action = $_GET['action'] ?? null;
+// CSRF protection + POST uniquement
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    $_SESSION['flash_error'] = "Méthode non autorisée (POST requis)";
+    header('Location: ' . url_for('coordination/ordres_preparation.php'));
+    exit;
+}
+
+verifierCsrf($_POST['csrf_token'] ?? '');
+
+$id = (int)($_POST['id'] ?? 0);
+$action = $_POST['action'] ?? '';
 
 if (!$id || !$action) {
     $_SESSION['flash_error'] = "Paramètres manquants";
@@ -37,17 +46,36 @@ try {
         };
         
         if ($nouveauStatut) {
+            // ✅ VALIDATIONS MÉTIER - surtout avant LIVRE
+            if ($nouveauStatut === 'LIVRE') {
+                // Vérifier qu'un bon de livraison (BL) existe pour cette vente
+                $vente_id = $ordre['vente_id'] ?? null;
+                if ($vente_id) {
+                    $stmtBL = $pdo->prepare("SELECT COUNT(*) as cnt FROM bons_livraison WHERE vente_id = ? AND statut NOT IN ('ANNULE', 'BROUILLON')");
+                    $stmtBL->execute([$vente_id]);
+                    $bl_count = $stmtBL->fetch()['cnt'] ?? 0;
+                    
+                    if ($bl_count === 0) {
+                        throw new Exception("Un bon de livraison validé est requis avant de marquer l'ordre comme LIVRE");
+                    }
+                }
+                // Vérifier que l'ordre a au moins été préparé
+                if ($ordre['date_preparation_effectuee'] === null) {
+                    throw new Exception("L'ordre doit avoir été préparé avant d'être marqué LIVRE");
+                }
+            }
+            
             $updates = ["statut = ?"];
             $params = [$nouveauStatut];
             
             // Horodatage spécifique
             if ($nouveauStatut === 'EN_PREPARATION') {
                 $updates[] = "magasinier_id = ?";
-                $params[] = $_SESSION['user_id'];
+                $params[] = $_SESSION['user_id'] ?? 1;
             } elseif ($nouveauStatut === 'PRET') {
                 $updates[] = "date_preparation_effectuee = NOW()";
             } elseif ($nouveauStatut === 'LIVRE') {
-                $updates[] = "date_preparation_effectuee = NOW()";
+                $updates[] = "date_livraison_effective = NOW()";
             }
             
             $params[] = $id;

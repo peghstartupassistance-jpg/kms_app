@@ -16,9 +16,12 @@ $options = [
 
 try {
     $pdo = new PDO($DB_DSN, $DB_USER, $DB_PASS, $options);
-    // Normaliser l'encodage côté connexion
+    // Normaliser l'encodage côté connexion - FORCER UTF-8MB4
     $pdo->exec('SET NAMES utf8mb4');
     $pdo->exec('SET CHARACTER SET utf8mb4');
+    $pdo->exec('SET character_set_connection=utf8mb4');
+    $pdo->exec('SET character_set_results=utf8mb4');
+    $pdo->exec('SET character_set_client=utf8mb4');
 } catch (PDOException $e) {
     // Ne pas exposer le message complet en prod
     die('Erreur de connexion à la base de données.');

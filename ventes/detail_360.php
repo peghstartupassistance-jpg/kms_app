@@ -77,7 +77,7 @@ $litiges = $stmt->fetchAll();
 
 // Mouvements de stock liés à cette vente
 $stmt = $pdo->prepare("
-    SELECT sm.*, p.code_produit, p.designation
+    SELECT sm.*, p.code_produit, p.designation, p.stock_actuel
     FROM stocks_mouvements sm
     JOIN produits p ON p.id = sm.produit_id
     WHERE (sm.source_id = ? AND sm.source_type = 'VENTE')
@@ -97,14 +97,17 @@ $stmt = $pdo->prepare("
 $stmt->execute([$venteId]);
 $ecritures = $stmt->fetchAll();
 
-// Encaissements (caisse)
+// Encaissements (caisse) - unified to journal_caisse
 $stmt = $pdo->prepare("
-    SELECT cj.*
-    FROM caisse_journal cj
-    WHERE (cj.source_id = ? AND cj.source_type = 'VENTE') OR cj.commentaire LIKE ?
-    ORDER BY cj.date_ecriture DESC
+    SELECT jc.*
+    FROM journal_caisse jc
+    WHERE (jc.vente_id = ? AND jc.sens = 'RECETTE') 
+       OR (jc.source_id = ? AND jc.source_type = 'VENTE')
+       OR jc.commentaire LIKE ?
+       AND jc.est_annule = 0
+    ORDER BY jc.date_operation DESC
 ");
-$stmt->execute([$venteId, '%V' . str_pad($venteId, 6, '0', STR_PAD_LEFT) . '%']);
+$stmt->execute([$venteId, $venteId, '%V' . str_pad($venteId, 6, '0', STR_PAD_LEFT) . '%']);
 $encaissements = $stmt->fetchAll();
 
 // Calculs de synthèse
@@ -117,6 +120,12 @@ $totalRetourne = array_sum(array_map(function($l) {
 
 $totalEncaisse = array_sum(array_column($encaissements, 'montant')) ?: 0;
 $tauxEncaissement = ($vente['montant_total_ttc'] > 0) ? round(($totalEncaisse / $vente['montant_total_ttc']) * 100, 1) : 0;
+
+// Vérifier la synchronisation : tous les BL générés + encaisse OK
+$tousLesBLGeneresEtSignes = (count($livraisons) > 0) && array_reduce($livraisons, function($carry, $bl) {
+    return $carry && ((int)($bl['signe_client'] ?? 0) === 1);
+}, true);
+$sync_ok = $tousLesBLGeneresEtSignes && ($totalEncaisse > 0 || $tauxLivraison === 100.0);
 
 include __DIR__ . '/../partials/header.php';
 include __DIR__ . '/../partials/sidebar.php';
@@ -172,11 +181,10 @@ include __DIR__ . '/../partials/sidebar.php';
                 <div class="kms-kpi-label">Synchronisation</div>
                 <div class="kms-kpi-value">
                     <?php 
-                    $sync_ok = ($vente['montant_total_ttc'] == $totalLivree) && ($totalEncaisse >= 0);
                     echo $sync_ok ? '<span class="text-success">✅</span>' : '<span class="text-danger">⚠️</span>';
                     ?>
                 </div>
-                <div class="kms-kpi-subtitle">Données cohérentes</div>
+                <div class="kms-kpi-subtitle">Livrés & Encaissés</div>
             </div>
         </div>
     </div>
@@ -426,7 +434,7 @@ include __DIR__ . '/../partials/sidebar.php';
                             <?php foreach ($litiges as $litige): ?>
                                 <tr>
                                     <td><?= date('d/m/Y', strtotime($litige['date_retour'])) ?></td>
-                                    <td><?= htmlspecialchars($litige['code']) ?> - <?= htmlspecialchars($litige['designation']) ?></td>
+                                    <td><?= htmlspecialchars($litige['code_produit'] ?? '?') ?> - <?= htmlspecialchars($litige['designation'] ?? '-') ?></td>
                                     <td><span class="badge bg-warning"><?= htmlspecialchars($litige['type_probleme']) ?></span></td>
                                     <td><?= htmlspecialchars(substr($litige['motif'], 0, 50)) ?>...</td>
                                     <td><span class="badge bg-info"><?= htmlspecialchars($litige['statut_traitement']) ?></span></td>
@@ -464,8 +472,8 @@ include __DIR__ . '/../partials/sidebar.php';
                                 <th>Produit</th>
                                 <th>Type Mouvement</th>
                                 <th class="text-end">Quantité</th>
-                                <th>Raison</th>
-                                <th>Stock Résultant</th>
+                                <th>Commentaire</th>
+                                <th class="text-end">Stock Actuel</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -476,7 +484,7 @@ include __DIR__ . '/../partials/sidebar.php';
                                     <td><span class="badge bg-primary"><?= htmlspecialchars($mvt['type_mouvement']) ?></span></td>
                                     <td class="text-end"><?= (int)$mvt['quantite'] ?></td>
                                     <td><?= htmlspecialchars($mvt['commentaire'] ?? '-') ?></td>
-                                    <td class="text-end"><span class="badge bg-info">-</span></td>
+                                    <td class="text-end"><?= number_format((float)($mvt['stock_actuel'] ?? 0), 0) ?></td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
@@ -510,9 +518,16 @@ include __DIR__ . '/../partials/sidebar.php';
                                     <tbody>
                                         <?php foreach ($encaissements as $enc): ?>
                                             <tr>
-                                                <td><?= date('d/m/Y', strtotime($enc['date_operation'])) ?></td>
-                                                <td><?= htmlspecialchars($enc['mode_paiement_nom'] ?? 'N/A') ?></td>
-                                                <td class="text-end text-success">+<?= number_format($enc['montant'], 0, ',', ' ') ?></td>
+                                                <td><?= date('d/m/Y H:i', strtotime($enc['date_operation'])) ?></td>
+                                                <td>
+                                                    <?php 
+                                                    $stmt_mode = $pdo->prepare("SELECT libelle FROM modes_paiement WHERE id = ?");
+                                                    $stmt_mode->execute([$enc['mode_paiement_id'] ?? 1]);
+                                                    $mode = $stmt_mode->fetch();
+                                                    echo htmlspecialchars($mode['libelle'] ?? 'N/A');
+                                                    ?>
+                                                </td>
+                                                <td class="text-end fw-bold"><?= number_format((float)$enc['montant'], 0, ',', ' ') ?> FCFA</td>
                                             </tr>
                                         <?php endforeach; ?>
                                     </tbody>
